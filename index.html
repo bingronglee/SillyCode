@@ -1,159 +1,265 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>出國地點匿名投票</title>
-  <style>
-    body {
-      font-family: "Segoe UI", sans-serif;
-      background-color: #f2f2f2;
-      margin: 0; padding: 1em;
-      max-width: 480px; margin: auto;
-    }
-    h2 { color: #333; text-align: center; }
-    .card {
-      background: white;
-      border-radius: 10px;
-      padding: 1em;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-      margin-top: 1em;
-    }
-    label, select {
-      display: block;
-      width: 100%;
-      margin-top: 10px;
-    }
-    select {
-      padding: 10px;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-    }
-    button {
-      background-color: #4CAF50;
-      color: white;
-      padding: 15px;
-      width: 100%;
-      border: none;
-      border-radius: 6px;
-      font-size: 16px;
-      margin-top: 20px;
-    }
-    .result {
-      background-color: #fff3cd;
-      padding: 1em;
-      margin-top: 20px;
-      border-radius: 8px;
-    }
-    ol {
-      padding-left: 1.2em;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>股票變化率計算器</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            flex-direction: column; /* Default to column for small screens */
+            justify-content: flex-start; /* Align content to top */
+            align-items: center; /* Center content horizontally */
+            min-height: 100vh;
+            background-color: #f4f7f6;
+            margin: 0;
+            padding: 20px; /* Add some padding around the content */
+            color: #333;
+            box-sizing: border-box; /* Include padding in element's total width and height */
+        }
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 25px;
+            font-size: 1.8em;
+            width: 100%; /* Ensure title takes full width */
+            max-width: 900px; /* Match max-width of the container for alignment */
+        }
+        .main-content-wrapper {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 900px; /* Overall max width for the two columns */
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column; /* Default stacked layout for mobile */
+            gap: 20px; /* Space between the two sections when stacked or side-by-side */
+        }
+        .calculator-section {
+            padding: 20px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            background-color: #fafafa;
+            /* Flex properties for responsiveness - will adjust in media query */
+            flex: 1 1 auto; /* Allow items to grow/shrink and take auto width */
+        }
+        .calculator-section h2 {
+            margin-top: 0;
+            color: #34495e;
+            font-size: 1.3em;
+            border-bottom: 2px solid #a0a0a0;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #555;
+        }
+        input[type="number"] {
+            width: calc(100% - 22px);
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+            font-size: 1em;
+        }
+        input[type="number"]:focus {
+            border-color: #007bff;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1.1em;
+            width: 100%;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        button:active {
+            background-color: #004085;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            font-size: 1.2em;
+            font-weight: bold;
+            text-align: center;
+            word-wrap: break-word;
+            min-height: 20px; /* Ensure some height even when empty */
+            display: flex; /* Use flex to center text vertically */
+            align-items: center;
+            justify-content: center;
+        }
+        /* Result colors */
+        .result.positive {
+            background-color: #d4edda; /* Light Green */
+            color: #155724; /* Dark Green */
+        }
+        .result.negative {
+            background-color: #f8d7da; /* Light Red */
+            color: #721c24; /* Dark Red */
+        }
+        .result.neutral {
+            background-color: #fff3cd; /* Light Yellow/Orange */
+            color: #856404; /* Dark Yellow/Orange */
+        }
+
+        /* Media Query for wider screens (e.g., tablets and desktops) */
+        @media (min-width: 768px) {
+            .main-content-wrapper {
+                flex-direction: row; /* Arrange items side-by-side */
+                justify-content: space-between; /* Distribute space evenly */
+            }
+            .calculator-section {
+                /* Each section takes about half the width, accounting for the gap */
+                flex: 1 1 calc(50% - 10px); /* 10px is half of the 20px gap */
+            }
+        }
+
+        /* Further adjustments for even larger screens, like specific 16:9 desktops */
+        @media (min-width: 1024px) {
+             .main-content-wrapper, h1 {
+                max-width: 1000px; /* Slightly wider for very large screens */
+            }
+        }
+
+        /* Ensure input and button are centered vertically within their own space if needed */
+        .calculator-section > * {
+            box-sizing: border-box;
+        }
+    </style>
 </head>
 <body>
+    <h1>股票變化率計算器</h1>
 
-  <h2>匿名出國投票</h2>
+    <div class="main-content-wrapper">
+        <!-- 計算漲跌變化率 -->
+        <div class="calculator-section">
+            <h2>1. 計算漲跌變化率 (%)</h2>
+            <label for="initialPrice">原始股價:</label>
+            <input type="number" id="initialPrice" placeholder="例如: 47.02" min="0" step="0.01">
 
-  <div class="card">
-    <form id="voteForm">
-      <label for="animalCode">選擇你的匿名代號：</label>
-      <select id="animalCode" required>
-        <option value="">-- 選擇一個動物代號 --</option>
-        <option>Panda</option>
-        <option>Fox</option>
-        <option>Koala</option>
-        <option>Tiger</option>
-        <option>Rabbit</option>
-        <option>Penguin</option>
-      </select>
+            <label for="finalPrice">最終股價:</label>
+            <input type="number" id="finalPrice" placeholder="例如: 46.1" min="0" step="0.01">
 
-      <p style="margin-top:1em;">請排序你想去的地點：</p>
-      <div id="voteFields"></div>
+            <button onclick="calculateChangeRate()">計算變化率</button>
+            <div id="changeRateResult" class="result"></div>
+        </div>
 
-      <button type="submit">送出投票</button>
-    </form>
-  </div>
+        <!-- 推估目標股價 -->
+        <div class="calculator-section">
+            <h2>2. 推估目標股價</h2>
+            <label for="basePrice">原始股價:</label>
+            <input type="number" id="basePrice" placeholder="例如: 47.02" min="0" step="0.01">
 
-  <div class="result" id="resultArea" style="display:none">
-    <h3>目前總積分排行：</h3>
-    <ol id="rankingList"></ol>
-  </div>
+            <label for="percentageChange">預期變化率 (%):</label>
+            <input type="number" id="percentageChange" placeholder="例如: 20 (漲20%) 或 -10 (跌10%)" step="0.01">
 
-  <script>
-    const places = ["越南胡志明市", "日本沖繩", "韓國濟州島", "韓國首爾", "香港"];
-    const scoreMap = [5, 4, 3, 2, 1];
-    const voteFields = document.getElementById("voteFields");
+            <button onclick="estimateTargetPrice()">推估目標價</button>
+            <div id="targetPriceResult" class="result"></div>
+        </div>
+    </div>
 
-    // 建立地點排序下拉選單
-    for (let i = 1; i <= places.length; i++) {
-      const div = document.createElement("div");
-      div.innerHTML = `
-        <label>第 ${i} 名：</label>
-        <select name="rank${i}" required>
-          <option value="">-- 選擇地點 --</option>
-          ${places.map(p => `<option value="${p}">${p}</option>`).join("")}
-        </select>`;
-      voteFields.appendChild(div);
-    }
-
-    const form = document.getElementById("voteForm");
-    form.addEventListener("submit", function (e) {
-      e.preventDefault();
-
-      const animalCode = document.getElementById("animalCode").value;
-      if (!animalCode) return alert("請選擇匿名代號！");
-      if (localStorage.getItem("voted_" + animalCode)) {
-        alert("這個代號已經投過票！");
-        return;
-      }
-
-      const selected = [];
-      for (let i = 1; i <= places.length; i++) {
-        const val = form[`rank${i}`].value;
-        if (!val || selected.includes(val)) {
-          alert("請正確排序，地點不可重複！");
-          return;
+    <script>
+        function resetResultClasses(elementId) {
+            const element = document.getElementById(elementId);
+            element.classList.remove('positive', 'negative', 'neutral');
         }
-        selected.push(val);
-      }
 
-      let total = JSON.parse(localStorage.getItem("voteTotal") || "{}");
-      selected.forEach((place, index) => {
-        total[place] = (total[place] || 0) + scoreMap[index];
-      });
-
-      localStorage.setItem("voteTotal", JSON.stringify(total));
-      localStorage.setItem("voted_" + animalCode, "1");
-
-      alert("✅ 投票完成！");
-      form.style.display = "none";
-      showResults();
-    });
-
-    function showResults() {
-      document.getElementById("resultArea").style.display = "block";
-      const total = JSON.parse(localStorage.getItem("voteTotal") || "{}");
-      const sorted = Object.entries(total).sort((a, b) => b[1] - a[1]);
-      const list = document.getElementById("rankingList");
-      list.innerHTML = "";
-      sorted.forEach(([place, score]) => {
-        list.innerHTML += `<li>${place}：${score} 分</li>`;
-      });
-    }
-
-    // 如果已投票，直接顯示結果
-    window.onload = () => {
-      const code = document.getElementById("animalCode");
-      code.addEventListener("change", () => {
-        const val = code.value;
-        if (val && localStorage.getItem("voted_" + val)) {
-          alert("這個代號已經投票過了！");
-          form.style.display = "none";
-          showResults();
+        function setResultClass(elementId, value) {
+            const element = document.getElementById(elementId);
+            resetResultClasses(elementId);
+            if (value > 0) {
+                element.classList.add('positive');
+            } else if (value < 0) {
+                element.classList.add('negative');
+            } else {
+                element.classList.add('neutral');
+            }
         }
-      });
-    };
-  </script>
 
+        function calculateChangeRate() {
+            const initialPriceInput = document.getElementById('initialPrice');
+            const finalPriceInput = document.getElementById('finalPrice');
+            const resultDiv = document.getElementById('changeRateResult');
+
+            const initialPrice = parseFloat(initialPriceInput.value);
+            const finalPrice = parseFloat(finalPriceInput.value);
+
+            resetResultClasses('changeRateResult');
+            resultDiv.textContent = ''; // Clear previous result
+
+            if (initialPriceInput.value === '' || finalPriceInput.value === '') {
+                 resultDiv.textContent = '請輸入原始股價與最終股價。';
+                 resultDiv.classList.add('neutral');
+                 return;
+            }
+
+            if (isNaN(initialPrice) || isNaN(finalPrice)) {
+                resultDiv.textContent = '請輸入有效的數字。';
+                resultDiv.classList.add('neutral');
+                return;
+            }
+            if (initialPrice <= 0) {
+                resultDiv.textContent = '原始股價必須大於0。';
+                resultDiv.classList.add('negative');
+                return;
+            }
+
+            const change = finalPrice - initialPrice;
+            const changeRate = (change / initialPrice) * 100;
+
+            resultDiv.textContent = `變化率: ${changeRate.toFixed(2)}%`;
+            setResultClass('changeRateResult', changeRate);
+        }
+
+        function estimateTargetPrice() {
+            const basePriceInput = document.getElementById('basePrice');
+            const percentageChangeInput = document.getElementById('percentageChange');
+            const resultDiv = document.getElementById('targetPriceResult');
+
+            const basePrice = parseFloat(basePriceInput.value);
+            const percentageChange = parseFloat(percentageChangeInput.value);
+
+            resetResultClasses('targetPriceResult');
+            resultDiv.textContent = ''; // Clear previous result
+
+            if (basePriceInput.value === '' || percentageChangeInput.value === '') {
+                 resultDiv.textContent = '請輸入原始股價與預期變化率。';
+                 resultDiv.classList.add('neutral');
+                 return;
+            }
+
+            if (isNaN(basePrice) || isNaN(percentageChange)) {
+                resultDiv.textContent = '請輸入有效的數字。';
+                resultDiv.classList.add('neutral');
+                return;
+            }
+            if (basePrice <= 0) {
+                resultDiv.textContent = '原始股價必須大於0。';
+                resultDiv.classList.add('negative');
+                return;
+            }
+
+            const targetPrice = basePrice * (1 + (percentageChange / 100));
+
+            resultDiv.textContent = `目標股價: ${targetPrice.toFixed(2)}`;
+            setResultClass('targetPriceResult', percentageChange); // Use percentageChange to determine color
+        }
+    </script>
 </body>
 </html>
