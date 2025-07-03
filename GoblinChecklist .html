@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>哥布林評量表 - 測測你是哪種哥布林！</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #1a1a1a;
+            color: #f0f0f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background-image: url('https://images.unsplash.com/photo-1565035010268-46f411fb9276?ixlib=rb-4.0.3&auto=format&fit=crop&w=1500&q=80');
+            background-size: cover;
+            background-attachment: fixed;
+        }
+        .container {
+            background: rgba(0, 0, 0, 0.85);
+            padding: 25px;
+            border-radius: 15px;
+            max-width: 650px;
+            width: 95%;
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.6);
+        }
+        h1 {
+            text-align: center;
+            color: #00ff00;
+            font-size: 2.2em;
+            text-shadow: 2px 2px 5px #000;
+            margin-bottom: 20px;
+        }
+        .question {
+            margin: 15px 0;
+            padding: 15px;
+            background: #2a2a2a;
+            border-radius: 8px;
+            border-left: 5px solid #00ff00;
+        }
+        .question label {
+            font-size: 1.1em;
+            color: #ddd;
+            display: block;
+            margin: 8px 0;
+            padding-left: 25px;
+            position: relative;
+        }
+        input[type="checkbox"], input[type="radio"] {
+            display: none;
+        }
+        input[type="checkbox"] + span, input[type="radio"] + span {
+            position: relative;
+            padding-left: 30px;
+            cursor: pointer;
+            display: inline-block;
+        }
+        input[type="checkbox"] + span:before, input[type="radio"] + span:before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 2px;
+            width: 18px;
+            height: 18px;
+            border: 2px solid #00ff00;
+            border-radius: 50%;
+            background: #1a1a1a;
+        }
+        input[type="checkbox"]:checked + span:before, input[type="radio"]:checked + span:before {
+            background: #00ff00;
+            box-shadow: inset 0 0 0 4px #1a1a1a;
+        }
+        .sub-option {
+            margin-left: 20px;
+            font-size: 0.95em;
+            color: #bbb;
+        }
+        button {
+            display: block;
+            margin: 25px auto;
+            padding: 12px 25px;
+            background: #00ff00;
+            color: #000;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.2em;
+            cursor: pointer;
+            transition: background 0.3s, transform 0.2s;
+        }
+        button:hover {
+            background: #00cc00;
+            transform: scale(1.05);
+        }
+        #result {
+            text-align: center;
+            font-size: 1.5em;
+            color: #00ff00;
+            margin-top: 20px;
+            text-shadow: 1px 1px 3px #000;
+        }
+        .goblin-image {
+            display: none;
+            margin: 20px auto;
+            max-width: 250px;
+            border-radius: 10px;
+            border: 2px solid #00ff00;
+        }
+        .credit {
+            text-align: center;
+            font-size: 0.8em;
+            color: #888;
+            margin-top: 20px;
+        }
+        .credit a {
+            color: #00ff00;
+            text-decoration: none;
+        }
+        .credit a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>哥布林評量表 - 你是哪種哥布林？</h1>
+        <form id="goblinForm">
+            <div class="question">
+                <label><input type="checkbox" name="q1" value="3"><span>1. 年收低於100萬 (3分)</span></label>
+            </div>
+            <div class="question">
+                <label><input type="checkbox" name="q2" value="6"><span>2. 基於外貌自卑，抗拒上傳照片到網路上 (6分)</span></label>
+            </div>
+            <div class="question">
+                <label>3. 成年男性身高</label>
+                <label class="sub-option"><input type="radio" name="q3" value="3"><span>低於172cm (3分)</span></label>
+                <label class="sub-option"><input type="radio" name="q3" value="5"><span>低於165cm (5分)</span></label>
+                <label class="sub-option"><input type="radio" name="q3" value="0" checked><span>不適用 (0分)</span></label>
+            </div>
+            <div class="question">
+                <label><input type="checkbox" name="q4" value="3"><span>4. 體脂率 > 20% (3分)</span></label>
+            </div>
+            <div class="question">
+                <label><input type="checkbox" name="q5" value="6"><span>5. 現實中幾乎沒朋友 (6分)</span></label>
+            </div>
+            <div class="question">
+                <label>6. 宅類興趣</label>
+                <label class="sub-option"><input type="radio" name="q6" value="4"><span>喜歡待在家（宅類興趣） (4分)</span></label>
+                <label class="sub-option"><input type="radio" name="q6" value="6"><span>喜歡待在家且無定期運動習慣 (6分)</span></label>
+                <label class="sub-option"><input type="radio" name="q6" value="0" checked><span>不適用 (0分)</span></label>
+            </div>
+            <div class="question">
+                <label><input type="checkbox" name="q7" value="4"><span>7. 現實生活中社交恐懼（排斥與陌生人互動） (4分)</span></label>
+            </div>
+            <div class="question">
+                <label>8. 單身狀態</label>
+                <label class="sub-option"><input type="radio" name="q8" value="6"><span>「非自願單身」超過3年 (6分)</span></label>
+                <label class="sub-option"><input type="radio" name="q8" value="8"><span>母胎單身 (8分)</span></label>
+                <label class="sub-option"><input type="radio" name="q8" value="0" checked><span>不適用 (0分)</span></label>
+            </div>
+            <div class="question">
+                <label><input type="checkbox" name="q9" value="1"><span>9. 在網路上以哥布林自居 (1分)</span></label>
+            </div>
+            <div class="question">
+                <label><input type="checkbox" name="q10" value="3"><span>10. 網路流量低（發文回文沒啥人理） (3分)</span></label>
+            </div>
+            <div class="question">
+                <label><input type="checkbox" name="q11" value="3"><span>11. 覺得自己一輩子大概就這樣了（無人生逆轉願景） (3分)</span></label>
+            </div>
+            <div class="question">
+                <label><input type="checkbox" name="q12" value="3"><span>12. 沒有拿得出手的專長或才華 (3分)</span></label>
+            </div>
+            <div class="question">
+                <label><input type="checkbox" name="q13" value="3"><span>13. 在人際社交圈中只是陪襯的配角雜魚 (3分)</span></label>
+            </div>
+            <div class="question">
+                <label><input type="checkbox" name="q14" value="2"><span>14. 答題到這時心緒已破防 (2分)</span></label>
+            </div>
+            <div class="question">
+                <label><input type="checkbox" name="q15" value="-10"><span>15. 帥（能以外貌條件營收維生者） (-10分)</span></label>
+            </div>
+            <button type="button" onclick="calculateScore()">計算我的哥布林等級！</button>
+        </form>
+        <div id="result"></div>
+        <img id="goblinImage" class="goblin-image" src="" alt="哥布林等級圖片">
+        <div class="credit">背景圖片由 <a href="https://unsplash.com" target="_blank">Unsplash</a> 提供</div>
+    </div>
+
+    <script>
+        function calculateScore() {
+            const form = document.getElementById('goblinForm');
+            let score = 0;
+
+            // 計算checkbox分數
+            const checkboxes = form.querySelectorAll('input[type="checkbox"]:checked');
+            checkboxes.forEach(checkbox => {
+                score += parseInt(checkbox.value);
+            });
+
+            // 計算radio分數
+            const radios = form.querySelectorAll('input[type="radio"]:checked');
+            radios.forEach(radio => {
+                score += parseInt(radio.value);
+            });
+
+            // 顯示結果
+            const resultDiv = document.getElementById('result');
+            const goblinImage = document.getElementById('goblinImage');
+            let resultText = '';
+            let imageUrl = '';
+
+            if (score >= 18 && score <= 22) {
+                resultText = `哥布林炮灰 (褲襠破布 + 棍棒) - 你是哥布林界的底層，連棍棒都拿不穩！快去洞穴練練級吧！`;
+                imageUrl = 'https://images.unsplash.com/photo-1618411640137-9382e4e6c2e4?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80';
+            } else if (score >= 23 && score <= 30) {
+                resultText = `哥布林士兵 (布甲 + 破銅爛鐵武器) - 勉強算個戰士，但武器隨時可能斷掉！再升級裝備吧！`;
+                imageUrl = 'https://images.unsplash.com/photo-1565035010268-46f411fb9276?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80';
+            } else if (score >= 31 && score <= 40) {
+                resultText = `哥布林隊長 (皮甲 + 一般金屬武器) - 你有點小權力，但別太囂張，洞穴裡還有更強的傢伙！`;
+                imageUrl = 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80';
+            } else if (score >= 41 && score <= 49) {
+                resultText = `哥布林長老 (鎧甲 + 精良金屬武器) - 資深哥布林，洞穴裡的傳說人物，準備統領族群了！`;
+                imageUrl = 'https://images.unsplash.com/photo-1565031491910-e57fac031c41?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80';
+            } else if (score >= 50) {
+                resultText = `尤達大師 (符文鎧甲 + 附魔武器) - 哥布林界的絕世高手，連精靈都得敬你三分！`;
+                imageUrl = 'https://images.unsplash.com/photo-1618411640137-9382e4e6c2e4?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80';
+            } else {
+                resultText = `你還不算哥布林！快逃吧，別被洞穴拖進去！試著進化成高等精靈吧！`;
+                imageUrl = 'https://images.unsplash.com/photo-1519742866993-66d3cfad5816?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80';
+            }
+
+            resultDiv.innerText = `你的分數：${score} 分 - ${resultText}`;
+            goblinImage.src = imageUrl;
+            goblinImage.style.display = 'block';
+        }
+    </script>
+</body>
+</html>
