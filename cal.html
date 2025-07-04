@@ -72,6 +72,25 @@
             opacity: 0.8;
         }
 
+        .error-container {
+            background: #e74c3c;
+            border: 2px solid #c0392b;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 15px 0;
+            display: none;
+        }
+
+        .error-item {
+            color: white;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .error-item:last-child {
+            margin-bottom: 0;
+        }
+
         .visualization-area {
             position: relative;
             width: 100%;
@@ -292,7 +311,6 @@
     </div>
 
     <script>
-        const visualScale = 50;
         let data = {
             gl1: null, inv1: null, depth1: null,  // 下游人孔 (左側)
             gl2: null, inv2: null, depth2: null,  // 上游人孔 (右側)
@@ -317,8 +335,98 @@
             });
         }
 
+        function validateData() {
+            const errors = [];
+            
+            // 驗證深度不能為負數
+            if (data.depth1 !== null && data.depth1 < 0) {
+                errors.push('下游人孔深度不能為負數');
+            }
+            if (data.depth2 !== null && data.depth2 < 0) {
+                errors.push('上游人孔深度不能為負數');
+            }
+            
+            // 驗證長度必須為正數
+            if (data.length !== null && data.length <= 0) {
+                errors.push('管線長度必須大於0');
+            }
+            
+            // 驗證坡度合理性（一般污水管坡度在0.05%-15%之間）
+            if (data.slope !== null && (data.slope < 0.05 || data.slope > 15)) {
+                errors.push('管線坡度建議範圍：0.05%-15%');
+            }
+            
+            // 驗證INV應該小於或等於GL
+            if (data.gl1 !== null && data.inv1 !== null && data.inv1 > data.gl1) {
+                errors.push('下游人孔管底高程不能高於地面高程');
+            }
+            if (data.gl2 !== null && data.inv2 !== null && data.inv2 > data.gl2) {
+                errors.push('上游人孔管底高程不能高於地面高程');
+            }
+            
+            // 驗證深度合理性（一般不超過30米）
+            if (data.depth1 !== null && data.depth1 > 30) {
+                errors.push('下游人孔深度超過30米，請檢查數據');
+            }
+            if (data.depth2 !== null && data.depth2 > 30) {
+                errors.push('上游人孔深度超過30米，請檢查數據');
+            }
+            
+            return errors;
+        }
+
+        function showErrors(errors) {
+            const errorDiv = document.getElementById('errorMessages') || createErrorDiv();
+            if (errors.length > 0) {
+                errorDiv.innerHTML = errors.map(error => `<div class="error-item">⚠️ ${error}</div>`).join('');
+                errorDiv.style.display = 'block';
+            } else {
+                errorDiv.style.display = 'none';
+            }
+        }
+
+        function createErrorDiv() {
+            const errorDiv = document.createElement('div');
+            errorDiv.id = 'errorMessages';
+            errorDiv.className = 'error-container';
+            document.querySelector('.controls').after(errorDiv);
+            return errorDiv;
+        }
+
+        function calculateDynamicScale() {
+            const containerHeight = 400;
+            const containerWidth = 1200;
+            const margin = 50;
+            
+            // 計算所需的最大深度
+            const maxDepth = Math.max(
+                data.depth1 || 0,
+                data.depth2 || 0,
+                3 // 最小顯示深度
+            );
+            
+            // 根據容器大小動態調整比例
+            const depthScale = (containerHeight - margin * 2) / (maxDepth * 1.5);
+            
+            // 限制縮放比例在合理範圍內
+            return Math.min(Math.max(depthScale, 10), 80);
+        }
+
         function calculate() {
             getInputValues();
+            
+            // 數據驗證
+            const errors = validateData();
+            showErrors(errors);
+            
+            // 如果有嚴重錯誤，停止計算
+            if (errors.some(error => 
+                error.includes('不能為負數') || 
+                error.includes('必須大於0') || 
+                error.includes('不能高於地面高程')
+            )) {
+                return;
+            }
             
             // 多輪次迭代計算
             for (let iteration = 0; iteration < 5; iteration++) {
@@ -382,18 +490,21 @@
         }
 
         function updateVisualization() {
+            // 動態計算縮放比例
+            const dynamicScale = calculateDynamicScale();
+            
             const manholeLeft = document.getElementById('manholeLeft');
             const manholeRight = document.getElementById('manholeRight');
             const pipe = document.getElementById('pipe');
 
             // 更新人孔高度（深度）
             if (data.depth1 !== null) {
-                const height = Math.max(50, data.depth1 * visualScale);
+                const height = Math.max(50, data.depth1 * dynamicScale);
                 manholeLeft.style.height = `${height}px`;
             }
 
             if (data.depth2 !== null) {
-                const height = Math.max(50, data.depth2 * visualScale);
+                const height = Math.max(50, data.depth2 * dynamicScale);
                 manholeRight.style.height = `${height}px`;
             }
 
@@ -410,8 +521,8 @@
 
                 // 計算管底位置（相對於地面線）
                 const groundY = 103;
-                const upstreamY = groundY + data.depth2 * visualScale;   // 上游（右側）管底位置
-                const downstreamY = groundY + data.depth1 * visualScale; // 下游（左側）管底位置
+                const upstreamY = groundY + data.depth2 * dynamicScale;   // 上游（右側）管底位置
+                const downstreamY = groundY + data.depth1 * dynamicScale; // 下游（左側）管底位置
 
                 // 設定管線位置和角度
                 pipe.style.left = `${endX}px`;
@@ -452,6 +563,12 @@
                 input.value = '';
                 input.classList.remove('calculated');
             });
+
+            // 隱藏錯誤信息
+            const errorDiv = document.getElementById('errorMessages');
+            if (errorDiv) {
+                errorDiv.style.display = 'none';
+            }
 
             // 重設視覺化
             document.getElementById('manholeLeft').style.height = '150px';
