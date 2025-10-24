@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<title>四大滑雪地區費用比較總表（2026年2月旅遊估算）</title>
+<style>
+  body{
+    font-family:"Helvetica Neue",Helvetica,Arial,"PingFang TC","Microsoft JhengHei",sans-serif;
+    background:#f5f7fa;
+    margin:0;
+    padding:40px 20px;
+    color:#333;
+  }
+  h1,h2{
+    color:#005a9c;
+    margin-top:0;
+  }
+  h1{
+    font-size:28px;
+    margin-bottom:10px;
+  }
+  h2{
+    font-size:20px;
+    margin:30px 0 10px;
+  }
+  .wrapper{
+    max-width:960px;
+    margin:0 auto;
+    background:#fff;
+    border-radius:8px;
+    box-shadow:0 4px 12px rgba(0,0,0,.08);
+    padding:30px 40px;
+  }
+  table{
+    width:100%;
+    border-collapse:collapse;
+    margin-bottom:30px;
+  }
+  th,td{
+    padding:12px 10px;
+    text-align:left;
+    border-bottom:1px solid #e0e0e0;
+  }
+  th{
+    background:#eef4ff;
+    color:#005a9c;
+    font-weight:600;
+  }
+  tr:last-child td{
+    border-bottom:none;
+  }
+  .total-row td{
+    background:#fff9e5;
+    font-weight:700;
+  }
+  .note{
+    font-size:14px;
+    color:#555;
+    line-height:1.7;
+    margin-bottom:20px;
+  }
+  .note li{
+    margin-bottom:6px;
+  }
+  .summary{
+    display:flex;
+    justify-content:space-between;
+    gap:20px;
+    flex-wrap:wrap;
+  }
+  .summary div{
+    flex:1 1 220px;
+    background:#eef4ff;
+    border-left:4px solid #005a9c;
+    padding:15px;
+    border-radius:4px;
+  }
+  .summary strong{
+    display:block;
+    margin-bottom:6px;
+    color:#005a9c;
+  }
+</style>
+</head>
+<body>
+
+<div class="wrapper">
+  <h1>四大滑雪地區費用比較總表（2026年2月旅遊估算）</h1>
+
+  <table>
+    <thead>
+      <tr>
+        <th>項目</th>
+        <th>田澤湖 (秋田縣)</th>
+        <th>新潟湯澤地區 (新潟縣)</th>
+        <th>白馬 (長野縣)</th>
+        <th>二世谷 (北海道)</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>一日雪票</td><td>NT$ 1,013</td><td>NT$ 1,316</td><td>NT$ 1,418</td><td>NT$ 1,823</td></tr>
+      <tr><td>雪具租借/日</td><td>NT$ 911</td><td>NT$ 1,114</td><td>NT$ 1,266</td><td>NT$ 1,620</td></tr>
+      <tr><td>住宿/晚</td><td>NT$ 2,329</td><td>NT$ 3,038</td><td>NT$ 3,746</td><td>NT$ 6,075</td></tr>
+      <tr><td>機場⇄雪場交通(單程)</td><td>NT$ 810</td><td>NT$ 1,924</td><td>NT$ 2,126</td><td>NT$ 1,114</td></tr>
+      <tr class="total-row"><td>當地總計 (5天4夜)</td><td>NT$ 16,706</td><td>NT$ 23,288</td><td>NT$ 27,287</td><td>NT$ 36,855</td></tr>
+      <tr><td>華航/長榮 來回機票 (2026年2月)</td><td>約 NT$ 17,000<br><small>(桃園–秋田)</small></td><td>約 NT$ 11,500<br><small>(桃園–東京/新潟)</small></td><td>約 NT$ 12,000<br><small>(桃園–東京)</small></td><td>約 NT$ 18,500<br><small>(桃園–札幌)</small></td></tr>
+      <tr class="total-row"><td>總花費 (含機票粗估)</td><td><strong>約 NT$ 33,700</strong></td><td><strong>約 NT$ 34,800</strong></td><td><strong>約 NT$ 39,300</strong></td><td><strong>約 NT$ 55,400</strong></td></tr>
+    </tbody>
+  </table>
+
+  <h2>機票價格補充說明</h2>
+  <ul class="note">
+    <li><strong>秋田線</strong>：華航冬季直飛每週約2~3班，2月經濟艙票價落在 NT$16,000～18,000 之間。</li>
+    <li><strong>東京/新潟線</strong>：華航與長榮每日多班航班，2月淡旺季平均約 NT$11,000～12,000。</li>
+    <li><strong>白馬地區交通</strong>：需從東京搭新幹線或巴士前往，約另增 NT$2,000 的交通花費。</li>
+    <li><strong>札幌線 (新千歲機場)</strong>：華航與長榮均有直飛，2月為雪季旺季，票價約 NT$17,000～19,000。</li>
+  </ul>
+
+  <h2>小結</h2>
+  <div class="summary">
+    <div><strong>交通最便捷</strong>新潟湯澤，以車站直通雪場優勢著稱。</div>
+    <div><strong>CP值最高</strong>田澤湖，總花費最低且雪質極佳。</div>
+    <div><strong>度假感最強</strong>白馬，兼顧專業雪道與旅遊氛圍。</div>
+    <div><strong>高端粉雪天堂</strong>二世谷，頂級粉雪與國際娛樂兼具但花費最高。</div>
+  </div>
+</div>
+
+</body>
+</html>
