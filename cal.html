@@ -3,593 +3,493 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>污水人孔管線數據圖形化計算機</title>
+    <title>污水管線縱斷面計算機 (重力流)</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        :root {
+            --bg-color: #1e293b;
+            --panel-color: #334155;
+            --input-bg: #0f172a;
+            --text-color: #e2e8f0;
+            --accent-blue: #38bdf8;
+            --accent-green: #4ade80;
+            --accent-orange: #fb923c;
+            --accent-red: #f87171;
+            --border-color: #475569;
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #2c3e50;
-            min-height: 100vh;
+            font-family: 'Microsoft JhengHei', 'Segoe UI', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
-            color: white;
-            padding: 20px;
+            min-height: 100vh;
         }
 
-        .title {
-            font-size: 2em;
-            font-weight: normal;
-            margin-bottom: 30px;
-            text-align: center;
-            color: white;
+        h1 {
+            font-weight: 300;
+            letter-spacing: 1px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid var(--accent-blue);
+            padding-bottom: 10px;
         }
 
-        .main-container {
-            background: #34495e;
-            border-radius: 10px;
-            padding: 30px;
-            width: 1200px;
-            max-width: 95vw;
-        }
-
-        .controls {
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-
-        .btn {
-            padding: 12px 30px;
-            font-size: 16px;
-            font-weight: bold;
-            border: 2px solid;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .btn-calculate {
-            background: #27ae60;
-            border-color: #27ae60;
-            color: white;
-        }
-
-        .btn-reset {
-            background: #e74c3c;
-            border-color: #e74c3c;
-            color: white;
-        }
-
-        .btn:hover {
-            opacity: 0.8;
-        }
-
-        .error-container {
-            background: #e74c3c;
-            border: 2px solid #c0392b;
-            border-radius: 5px;
-            padding: 15px;
-            margin: 15px 0;
-            display: none;
-        }
-
-        .error-item {
-            color: white;
-            font-weight: bold;
-            margin-bottom: 5px;
-        }
-
-        .error-item:last-child {
-            margin-bottom: 0;
-        }
-
-        .visualization-area {
-            position: relative;
-            width: 100%;
-            height: 400px;
-            background: #95a5a6;
-            border-radius: 10px;
-            overflow: hidden;
-            margin-bottom: 30px;
-            border: 2px solid #7f8c8d;
-        }
-
-        .ground-line {
-            position: absolute;
-            top: 100px;
-            left: 0;
-            right: 0;
-            height: 3px;
-            background: #27ae60;
-        }
-
-        .manhole {
-            position: absolute;
-            width: 60px;
-            background: #34495e;
-            border: 3px solid #3498db;
-            border-radius: 5px;
-            transition: all 0.5s ease;
-        }
-
-        .manhole-left {
-            left: 100px;
-            top: 103px;
-            height: 150px;
-        }
-
-        .manhole-right {
-            right: 100px;
-            top: 103px;
-            height: 120px;
-        }
-
-        .pipe {
-            position: absolute;
-            height: 8px;
-            background: #e67e22;
-            border-radius: 4px;
-            transform-origin: left center;
-            transition: all 0.5s ease;
-        }
-
-        .data-labels {
-            position: absolute;
-            font-weight: bold;
-            pointer-events: none;
-            background: rgba(0,0,0,0.7);
-            padding: 2px 6px;
-            border-radius: 3px;
-            font-size: 14px;
-        }
-
-        .label-gl { color: #2ecc71; }
-        .label-inv { color: #e74c3c; }
-        .label-depth { color: white; }
-        .label-pipe { color: #f39c12; }
-
-        .input-section {
+        .container {
             display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
-            gap: 30px;
-            margin-top: 20px;
+            grid-template-columns: 1fr;
+            gap: 20px;
+            width: 100%;
+            max-width: 1200px;
+        }
+
+        /* 繪圖區域 */
+        .visualization-box {
+            background-color: #fff; /* 圖紙背景白 */
+            border-radius: 8px;
+            padding: 10px;
+            height: 400px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        svg {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        /* 輸入控制區域 */
+        .control-panel {
+            display: grid;
+            grid-template-columns: 1fr 1.2fr 1fr;
+            gap: 15px;
+            background-color: var(--panel-color);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+        }
+
+        .panel-section {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            padding: 15px;
+            border-radius: 8px;
+            background-color: rgba(0,0,0,0.2);
+            border: 1px solid var(--border-color);
+        }
+
+        .panel-section.upstream { border-top: 4px solid var(--accent-blue); }
+        .panel-section.pipe { border-top: 4px solid var(--accent-orange); }
+        .panel-section.downstream { border-top: 4px solid var(--accent-green); }
+
+        h3 {
+            margin: 0 0 10px 0;
+            text-align: center;
+            font-size: 1.1em;
+            opacity: 0.9;
         }
 
         .input-group {
-            background: #2c3e50;
-            padding: 20px;
-            border-radius: 10px;
-            border: 1px solid #34495e;
-        }
-
-        .input-group h3 {
-            margin-bottom: 15px;
-            color: #3498db;
-            text-align: center;
-            font-size: 1.2em;
-        }
-
-        .input-row {
             display: flex;
             align-items: center;
-            margin-bottom: 10px;
-            gap: 10px;
+            justify-content: space-between;
         }
 
-        .input-row label {
-            width: 80px;
-            font-weight: bold;
-        }
-
-        .input-row input {
+        .input-group label {
+            font-size: 0.9em;
+            color: #94a3b8;
             flex: 1;
-            padding: 8px 12px;
-            border: 2px solid #7f8c8d;
-            border-radius: 5px;
-            background: #ecf0f1;
-            color: #2c3e50;
-            font-size: 14px;
-            transition: border-color 0.3s ease;
         }
 
-        .input-row input:focus {
+        .input-wrapper {
+            flex: 2;
+            position: relative;
+        }
+
+        input[type="number"] {
+            width: 100%;
+            background-color: var(--input-bg);
+            border: 1px solid var(--border-color);
+            color: white;
+            padding: 8px 10px;
+            border-radius: 4px;
+            font-size: 1em;
+            text-align: right;
+            box-sizing: border-box;
+        }
+
+        input[type="number"]:focus {
             outline: none;
-            border-color: #3498db;
+            border-color: var(--accent-blue);
+        }
+        
+        /* 自動計算出的數值樣式 */
+        input.auto-filled {
+            color: var(--accent-green);
+            font-weight: bold;
+            border-color: var(--accent-green);
         }
 
-        .input-row input::placeholder {
-            color: #95a5a6;
+        .unit {
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #64748b;
+            font-size: 0.8em;
+            pointer-events: none;
         }
 
-        .calculated {
-            background: #d5f4e6 !important;
-            border-color: #27ae60 !important;
+        .btn-area {
+            grid-column: 1 / -1;
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 10px;
         }
+
+        button {
+            padding: 10px 30px;
+            border: none;
+            border-radius: 6px;
+            font-size: 1em;
+            cursor: pointer;
+            font-weight: bold;
+            transition: transform 0.1s;
+        }
+
+        .btn-calc { background-color: var(--accent-blue); color: #0f172a; }
+        .btn-reset { background-color: var(--border-color); color: white; }
+        button:hover { opacity: 0.9; transform: translateY(-1px); }
+        button:active { transform: translateY(1px); }
+
+        /* 警告訊息 */
+        .status-msg {
+            grid-column: 1 / -1;
+            text-align: center;
+            min-height: 24px;
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+        .error { color: var(--accent-red); }
+        .info { color: var(--accent-green); }
 
         @media (max-width: 768px) {
-            .main-container {
-                width: 100%;
-                padding: 20px;
-            }
-            
-            .input-section {
-                grid-template-columns: 1fr;
-                gap: 20px;
-            }
-            
-            .title {
-                font-size: 1.5em;
-            }
-            
-            .visualization-area {
-                height: 300px;
-            }
+            .control-panel { grid-template-columns: 1fr; }
+            .panel-section.pipe { order: 2; }
+            .panel-section.upstream { order: 1; }
+            .panel-section.downstream { order: 3; }
         }
+
+        /* SVG Styles */
+        .svg-ground { stroke: #64748b; stroke-width: 2; stroke-dasharray: 5,5; }
+        .svg-manhole { fill: #e2e8f0; stroke: #334155; stroke-width: 2; }
+        .svg-pipe { stroke: #f97316; stroke-width: 4; }
+        .svg-water { stroke: #38bdf8; stroke-width: 2; stroke-dasharray: 2,2; }
+        .svg-text { font-size: 12px; fill: #334155; font-family: monospace; }
+        .svg-dim { stroke: #94a3b8; stroke-width: 1; }
+        .highlight-bg { fill: #fef3c7; } /* 標示坡度異常 */
     </style>
 </head>
 <body>
-    <div class="title">污水人孔管線數據圖形化計算機</div>
-    
-    <div class="main-container">
-        <div class="controls">
-            <button class="btn btn-calculate" onclick="calculate()">計算</button>
-            <button class="btn btn-reset" onclick="reset()">重設</button>
+
+    <h1>污水管線縱斷面計算機</h1>
+
+    <div class="container">
+        <!-- 圖形顯示區 -->
+        <div class="visualization-box" id="visBox">
+            <svg id="mainSvg" viewBox="0 0 800 400" preserveAspectRatio="xMidYMid meet">
+                <!-- 內容將由 JS 動態生成 -->
+                <text x="400" y="200" text-anchor="middle" fill="#94a3b8">請輸入數據並點擊計算</text>
+            </svg>
         </div>
 
-        <div class="visualization-area" id="visualization">
-            <div class="ground-line"></div>
-            <div class="manhole manhole-left" id="manholeLeft"></div>
-            <div class="manhole manhole-right" id="manholeRight"></div>
-            <div class="pipe" id="pipe"></div>
-            
-            <!-- 數據標籤 -->
-            <div class="data-labels label-gl" id="labelGL1" style="left: 70px; top: 70px;">GL: -- m</div>
-            <div class="data-labels label-inv" id="labelINV1" style="left: 70px; top: 280px;">INV: -- m</div>
-            <div class="data-labels label-depth" id="labelDepth1" style="left: 180px; top: 180px;">Depth: -- m</div>
-            
-            <div class="data-labels label-gl" id="labelGL2" style="right: 70px; top: 70px;">GL: -- m</div>
-            <div class="data-labels label-inv" id="labelINV2" style="right: 70px; top: 280px;">INV: -- m</div>
-            <div class="data-labels label-depth" id="labelDepth2" style="right: 180px; top: 180px;">Depth: -- m</div>
-            
-            <div class="data-labels label-pipe" id="labelLength" style="left: 50%; top: 50%; transform: translateX(-50%);">L: -- m</div>
-            <div class="data-labels label-pipe" id="labelSlope" style="left: 50%; top: 320px; transform: translateX(-50%);">S: -- %</div>
-        </div>
+        <div class="status-msg" id="statusMsg"></div>
 
-        <div class="input-section">
-            <div class="input-group">
-                <h3>下游人孔 (左側)</h3>
-                <div class="input-row">
-                    <label class="label-gl">GL:</label>
-                    <input type="number" id="gl1" placeholder="地面高程 (m)" step="0.01">
+        <!-- 控制面板 -->
+        <div class="control-panel">
+            
+            <!-- 下游 (左側) -->
+            <div class="panel-section downstream">
+                <h3>下游人孔 (左/Out)</h3>
+                <div class="input-group">
+                    <label>地面 (GL)</label>
+                    <div class="input-wrapper">
+                        <input type="number" id="gl_down" placeholder="選填" step="0.01">
+                        <span class="unit">m</span>
+                    </div>
                 </div>
-                <div class="input-row">
-                    <label class="label-inv">INV:</label>
-                    <input type="number" id="inv1" placeholder="管底高程 (m)" step="0.01">
+                <div class="input-group">
+                    <label>管底 (INV)</label>
+                    <div class="input-wrapper">
+                        <input type="number" id="inv_down" placeholder="高程" step="0.01">
+                        <span class="unit">m</span>
+                    </div>
                 </div>
-                <div class="input-row">
-                    <label class="label-depth">Depth:</label>
-                    <input type="number" id="depth1" placeholder="深度 (m)" step="0.01">
+                <div class="input-group">
+                    <label>深度 (D)</label>
+                    <div class="input-wrapper">
+                        <input type="number" id="depth_down" placeholder="GL-INV" step="0.01" readonly style="background:rgba(0,0,0,0.3); cursor:default;">
+                        <span class="unit">m</span>
+                    </div>
                 </div>
             </div>
 
-            <div class="input-group">
-                <h3>管線數據</h3>
-                <div class="input-row">
-                    <label class="label-pipe">L:</label>
-                    <input type="number" id="length" placeholder="長度 (m)" step="0.01">
+            <!-- 管線參數 (中間) -->
+            <div class="panel-section pipe">
+                <h3>管線參數 (Pipe)</h3>
+                <div class="input-group">
+                    <label>長度 (L)</label>
+                    <div class="input-wrapper">
+                        <input type="number" id="length" placeholder="距離" step="0.01">
+                        <span class="unit">m</span>
+                    </div>
                 </div>
-                <div class="input-row">
-                    <label class="label-pipe">S:</label>
-                    <input type="number" id="slope" placeholder="坡度 (%)" step="0.01">
+                <div class="input-group">
+                    <label>坡度 (S)</label>
+                    <div class="input-wrapper">
+                        <input type="number" id="slope" placeholder="百分比" step="0.01">
+                        <span class="unit">%</span>
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label>落差 (Fall)</label>
+                    <div class="input-wrapper">
+                        <input type="number" id="fall" placeholder="高程差" step="0.01" readonly style="background:rgba(0,0,0,0.3); cursor:default;">
+                        <span class="unit">m</span>
+                    </div>
                 </div>
             </div>
 
-            <div class="input-group">
-                <h3>上游人孔 (右側)</h3>
-                <div class="input-row">
-                    <label class="label-gl">GL:</label>
-                    <input type="number" id="gl2" placeholder="地面高程 (m)" step="0.01">
+            <!-- 上游 (右側) -->
+            <div class="panel-section upstream">
+                <h3>上游人孔 (右/In)</h3>
+                <div class="input-group">
+                    <label>地面 (GL)</label>
+                    <div class="input-wrapper">
+                        <input type="number" id="gl_up" placeholder="選填" step="0.01">
+                        <span class="unit">m</span>
+                    </div>
                 </div>
-                <div class="input-row">
-                    <label class="label-inv">INV:</label>
-                    <input type="number" id="inv2" placeholder="管底高程 (m)" step="0.01">
+                <div class="input-group">
+                    <label>管底 (INV)</label>
+                    <div class="input-wrapper">
+                        <input type="number" id="inv_up" placeholder="高程" step="0.01">
+                        <span class="unit">m</span>
+                    </div>
                 </div>
-                <div class="input-row">
-                    <label class="label-depth">Depth:</label>
-                    <input type="number" id="depth2" placeholder="深度 (m)" step="0.01">
+                <div class="input-group">
+                    <label>深度 (D)</label>
+                    <div class="input-wrapper">
+                        <input type="number" id="depth_up" placeholder="GL-INV" step="0.01" readonly style="background:rgba(0,0,0,0.3); cursor:default;">
+                        <span class="unit">m</span>
+                    </div>
                 </div>
+            </div>
+
+            <div class="btn-area">
+                <button class="btn-calc" onclick="calculateAll()">計算並繪圖 (Calculate)</button>
+                <button class="btn-reset" onclick="resetAll()">清除重設 (Reset)</button>
             </div>
         </div>
     </div>
 
     <script>
-        let data = {
-            gl1: null, inv1: null, depth1: null,  // 下游人孔 (左側)
-            gl2: null, inv2: null, depth2: null,  // 上游人孔 (右側)
-            length: null, slope: null
+        // 取得所有輸入框 DOM
+        const els = {
+            gl_down: document.getElementById('gl_down'),
+            inv_down: document.getElementById('inv_down'),
+            depth_down: document.getElementById('depth_down'),
+            
+            length: document.getElementById('length'),
+            slope: document.getElementById('slope'),
+            fall: document.getElementById('fall'),
+
+            gl_up: document.getElementById('gl_up'),
+            inv_up: document.getElementById('inv_up'),
+            depth_up: document.getElementById('depth_up'),
+
+            svg: document.getElementById('mainSvg'),
+            msg: document.getElementById('statusMsg')
         };
 
-        function getInputValues() {
-            const inputs = ['gl1', 'inv1', 'depth1', 'gl2', 'inv2', 'depth2', 'length', 'slope'];
-            inputs.forEach(id => {
-                const value = parseFloat(document.getElementById(id).value);
-                data[id] = isNaN(value) ? null : value;
-            });
+        // 取得數值 (Helper function)
+        const val = (id) => {
+            const v = parseFloat(els[id].value);
+            return isNaN(v) ? null : v;
+        };
+
+        // 設定數值並標記樣式
+        const setVal = (id, v, isAuto = true) => {
+            const el = els[id];
+            el.value = v.toFixed(3); // 工程通常取小數點後三位
+            if (isAuto) {
+                el.classList.add('auto-filled');
+                setTimeout(() => el.classList.remove('auto-filled'), 2000); // 閃爍效果
+            }
+        };
+
+        // 清除樣式監聽
+        document.querySelectorAll('input').forEach(input => {
+            input.addEventListener('input', () => input.classList.remove('auto-filled'));
+        });
+
+        function resetAll() {
+            document.querySelectorAll('input').forEach(i => i.value = '');
+            els.svg.innerHTML = '<text x="400" y="200" text-anchor="middle" fill="#94a3b8">請輸入數據並點擊計算</text>';
+            els.msg.textContent = '';
         }
 
-        function setInputValues() {
-            Object.keys(data).forEach(key => {
-                const input = document.getElementById(key);
-                if (data[key] !== null) {
-                    input.value = data[key].toFixed(2);
-                    input.classList.add('calculated');
-                }
-            });
-        }
+        // 核心計算邏輯
+        function calculateAll() {
+            els.msg.textContent = '';
+            els.msg.className = 'status-msg';
 
-        function validateData() {
-            const errors = [];
+            // 1. 處理地面高程 (GL) 邏輯
+            // 規則：如果都沒填，暫時不處理（繪圖時給假定值）。如果填了一個，另一個預設相等。
+            let gUp = val('gl_up');
+            let gDown = val('gl_down');
             
-            // 驗證深度不能為負數
-            if (data.depth1 !== null && data.depth1 < 0) {
-                errors.push('下游人孔深度不能為負數');
+            if (gUp !== null && gDown === null) {
+                gDown = gUp;
+                setVal('gl_down', gDown);
+            } else if (gDown !== null && gUp === null) {
+                gUp = gDown;
+                setVal('gl_up', gUp);
             }
-            if (data.depth2 !== null && data.depth2 < 0) {
-                errors.push('上游人孔深度不能為負數');
-            }
-            
-            // 驗證長度必須為正數
-            if (data.length !== null && data.length <= 0) {
-                errors.push('管線長度必須大於0');
-            }
-            
-            // 驗證坡度合理性（一般污水管坡度在0.05%-15%之間）
-            if (data.slope !== null && (data.slope < 0.05 || data.slope > 15)) {
-                errors.push('管線坡度建議範圍：0.05%-15%');
-            }
-            
-            // 驗證INV應該小於或等於GL
-            if (data.gl1 !== null && data.inv1 !== null && data.inv1 > data.gl1) {
-                errors.push('下游人孔管底高程不能高於地面高程');
-            }
-            if (data.gl2 !== null && data.inv2 !== null && data.inv2 > data.gl2) {
-                errors.push('上游人孔管底高程不能高於地面高程');
-            }
-            
-            // 驗證深度合理性（一般不超過30米）
-            if (data.depth1 !== null && data.depth1 > 30) {
-                errors.push('下游人孔深度超過30米，請檢查數據');
-            }
-            if (data.depth2 !== null && data.depth2 > 30) {
-                errors.push('上游人孔深度超過30米，請檢查數據');
-            }
-            
-            return errors;
-        }
 
-        function showErrors(errors) {
-            const errorDiv = document.getElementById('errorMessages') || createErrorDiv();
-            if (errors.length > 0) {
-                errorDiv.innerHTML = errors.map(error => `<div class="error-item">⚠️ ${error}</div>`).join('');
-                errorDiv.style.display = 'block';
-            } else {
-                errorDiv.style.display = 'none';
-            }
-        }
+            // 2. 處理管線幾何計算 (知三求一)
+            // 變數：inv_up, inv_down, length, slope
+            let iUp = val('inv_up');
+            let iDown = val('inv_down');
+            let L = val('length');
+            let S = val('slope');
 
-        function createErrorDiv() {
-            const errorDiv = document.createElement('div');
-            errorDiv.id = 'errorMessages';
-            errorDiv.className = 'error-container';
-            document.querySelector('.controls').after(errorDiv);
-            return errorDiv;
-        }
-
-        function calculateDynamicScale() {
-            const containerHeight = 400;
-            const containerWidth = 1200;
-            const margin = 50;
-            
-            // 計算所需的最大深度
-            const maxDepth = Math.max(
-                data.depth1 || 0,
-                data.depth2 || 0,
-                3 // 最小顯示深度
-            );
-            
-            // 根據容器大小動態調整比例
-            const depthScale = (containerHeight - margin * 2) / (maxDepth * 1.5);
-            
-            // 限制縮放比例在合理範圍內
-            return Math.min(Math.max(depthScale, 10), 80);
-        }
-
-        function calculate() {
-            getInputValues();
-            
-            // 數據驗證
-            const errors = validateData();
-            showErrors(errors);
-            
-            // 如果有嚴重錯誤，停止計算
-            if (errors.some(error => 
-                error.includes('不能為負數') || 
-                error.includes('必須大於0') || 
-                error.includes('不能高於地面高程')
-            )) {
-                return;
-            }
-            
-            // 多輪次迭代計算
-            for (let iteration = 0; iteration < 5; iteration++) {
-                let hasChanged = false;
-
-                // 人孔內部關聯計算
-                // 下游人孔 (左側)
-                if (data.gl1 !== null && data.inv1 !== null && data.depth1 === null) {
-                    data.depth1 = data.gl1 - data.inv1;
-                    hasChanged = true;
-                } else if (data.gl1 !== null && data.depth1 !== null && data.inv1 === null) {
-                    data.inv1 = data.gl1 - data.depth1;
-                    hasChanged = true;
-                } else if (data.inv1 !== null && data.depth1 !== null && data.gl1 === null) {
-                    data.gl1 = data.inv1 + data.depth1;
-                    hasChanged = true;
-                }
-
-                // 上游人孔 (右側)
-                if (data.gl2 !== null && data.inv2 !== null && data.depth2 === null) {
-                    data.depth2 = data.gl2 - data.inv2;
-                    hasChanged = true;
-                } else if (data.gl2 !== null && data.depth2 !== null && data.inv2 === null) {
-                    data.inv2 = data.gl2 - data.depth2;
-                    hasChanged = true;
-                } else if (data.inv2 !== null && data.depth2 !== null && data.gl2 === null) {
-                    data.gl2 = data.inv2 + data.depth2;
-                    hasChanged = true;
-                }
-
-                // 管線段關聯計算（重力流：右側上游→左側下游）
-                if (data.inv1 !== null && data.inv2 !== null && data.length !== null && data.slope === null) {
-                    // 坡度 = (上游INV - 下游INV) / 長度
-                    const fall = data.inv2 - data.inv1; // 上游INV - 下游INV
-                    data.slope = (fall / data.length) * 100; // 轉換為百分比
-                    hasChanged = true;
-                } else if (data.inv2 !== null && data.length !== null && data.slope !== null && data.inv1 === null) {
-                    // 已知上游INV，求下游INV
-                    const fall = data.length * (data.slope / 100);
-                    data.inv1 = data.inv2 - fall; // 下游INV = 上游INV - 高程差
-                    hasChanged = true;
-                } else if (data.inv1 !== null && data.length !== null && data.slope !== null && data.inv2 === null) {
-                    // 已知下游INV，求上游INV
-                    const fall = data.length * (data.slope / 100);
-                    data.inv2 = data.inv1 + fall; // 上游INV = 下游INV + 高程差
-                    hasChanged = true;
-                } else if (data.inv1 !== null && data.inv2 !== null && data.slope !== null && data.length === null) {
-                    // 已知兩端INV和坡度，求長度
-                    const fall = Math.abs(data.inv2 - data.inv1);
-                    if (data.slope !== 0) {
-                        data.length = fall / Math.abs(data.slope / 100);
-                        hasChanged = true;
+            // 邏輯判斷迴圈 (簡單的一次性判斷)
+            try {
+                // 情況 A: 已知兩端高程 -> 算 Fall
+                if (iUp !== null && iDown !== null) {
+                    const fall = iUp - iDown;
+                    setVal('fall', fall);
+                    
+                    // 如果有長度，算坡度
+                    if (L !== null && S === null) {
+                        if (L <= 0) throw "管線長度必須大於 0";
+                        S = (fall / L) * 100;
+                        setVal('slope', S);
+                    } 
+                    // 如果有坡度，算長度 (較少見，但可算)
+                    else if (S !== null && L === null) {
+                        if (S === 0) throw "坡度為 0 無法反推長度";
+                        L = (fall / (S/100));
+                        setVal('length', L);
                     }
                 }
-
-                if (!hasChanged) break;
+                // 情況 B: 已知上游 + 長度 + 坡度 -> 算下游
+                else if (iUp !== null && L !== null && S !== null && iDown === null) {
+                    const fall = L * (S / 100);
+                    iDown = iUp - fall;
+                    setVal('inv_down', iDown);
+                    setVal('fall', fall);
+                }
+                // 情況 C: 已知下游 + 長度 + 坡度 -> 算上游
+                else if (iDown !== null && L !== null && S !== null && iUp === null) {
+                    const fall = L * (S / 100);
+                    iUp = iDown + fall;
+                    setVal('inv_up', iUp);
+                    setVal('fall', fall);
+                }
+            } catch (e) {
+                els.msg.textContent = "錯誤: " + e;
+                els.msg.classList.add('error');
+                return;
             }
 
-            setInputValues();
-            updateVisualization();
+            // 重新抓取計算後的值
+            iUp = val('inv_up');
+            iDown = val('inv_down');
+            gUp = val('gl_up');
+            gDown = val('gl_down');
+
+            // 3. 計算深度 (Depth)
+            if (iUp !== null && gUp !== null) setVal('depth_up', gUp - iUp, false);
+            if (iDown !== null && gDown !== null) setVal('depth_down', gDown - iDown, false);
+
+            // 4. 驗證與警告
+            if (iUp !== null && iDown !== null && iUp < iDown) {
+                els.msg.innerHTML = "⚠️ 警告：發生逆坡 (上游高程低於下游)，請檢查數據！";
+                els.msg.classList.add('error');
+            } else if (S !== null && S < 0.3) {
+                els.msg.innerHTML = "ℹ️ 提示：坡度小於 0.3%，流速可能不足。";
+                els.msg.classList.add('info');
+            }
+
+            // 5. 執行繪圖
+            drawSVG(gUp, gDown, iUp, iDown, L, S);
         }
 
-        function updateVisualization() {
-            // 動態計算縮放比例
-            const dynamicScale = calculateDynamicScale();
+        // SVG 繪圖邏輯
+        function drawSVG(gUp, gDown, iUp, iDown, L, S) {
+            if (iUp === null || iDown === null) return;
+
+            // 如果沒有 GL，為了繪圖美觀，假定 GL = 最高 INV + 2m
+            const maxInv = Math.max(iUp, iDown);
+            let drawGUp = gUp !== null ? gUp : maxInv + 2.5;
+            let drawGDown = gDown !== null ? gDown : maxInv + 2.5;
+
+            // 1. 定義畫布邊界與座標系
+            const w = 800;
+            const h = 400;
+            const padding = 60;
+            const chartW = w - padding * 2;
+            const chartH = h - padding * 2;
+
+            // 2. 計算 Y 軸縮放比例 (Vertical Scale)
+            // 找出最大與最小高程 (包含 INV 和 GL)
+            const maxEl = Math.max(drawGUp, drawGDown);
+            const minEl = Math.min(iUp, iDown);
+            let diffEl = maxEl - minEl;
+            if (diffEl < 1) diffEl = 1; // 避免高程差太小導致爆掉
+
+            // 每公尺代表多少像素 (保留上下緩衝)
+            const scaleY = chartH / (diffEl * 1.2); 
             
-            const manholeLeft = document.getElementById('manholeLeft');
-            const manholeRight = document.getElementById('manholeRight');
-            const pipe = document.getElementById('pipe');
+            // Y軸轉換函數 (高程 -> 像素 Y)
+            // SVG Y軸向下是正，所以要反轉：PixelY = Padding + (MaxEl - TargetEl) * scale
+            const getY = (el) => padding + (maxEl - el) * scaleY + (padding * 0.5); // 稍微往下移一點
 
-            // 更新人孔高度（深度）
-            if (data.depth1 !== null) {
-                const height = Math.max(50, data.depth1 * dynamicScale);
-                manholeLeft.style.height = `${height}px`;
-            }
+            // X軸位置 (固定)
+            const xDown = padding + 50;      // 左側人孔中心 (下游)
+            const xUp = w - padding - 50;    // 右側人孔中心 (上游)
+            const mhWidth = 60;              // 人孔寬度
 
-            if (data.depth2 !== null) {
-                const height = Math.max(50, data.depth2 * dynamicScale);
-                manholeRight.style.height = `${height}px`;
-            }
+            // 座標計算
+            const yGDown = getY(drawGDown);
+            const yGUp = getY(drawGUp);
+            const yIDown = getY(iDown);
+            const yIUp = getY(iUp);
 
-            // 更新管線（從右側上游到左側下游）
-            if (data.inv1 !== null && data.inv2 !== null && data.length !== null) {
-                const leftRect = manholeLeft.getBoundingClientRect();
-                const rightRect = manholeRight.getBoundingClientRect();
-                const visualizationRect = document.getElementById('visualization').getBoundingClientRect();
+            // 顏色定義
+            const isBackPitch = iUp < iDown;
+            const pipeColor = isBackPitch ? '#ef4444' : '#f97316'; // 逆坡變紅
 
-                // 計算管線起點和終點位置
-                const startX = rightRect.left - visualizationRect.left + 30; // 右側人孔中心
-                const endX = leftRect.right - visualizationRect.left - 30;    // 左側人孔中心
-                const pipeLength = startX - endX; // 從右到左的長度
+            // 構建 SVG 內容
+            let svgContent = ``;
 
-                // 計算管底位置（相對於地面線）
-                const groundY = 103;
-                const upstreamY = groundY + data.depth2 * dynamicScale;   // 上游（右側）管底位置
-                const downstreamY = groundY + data.depth1 * dynamicScale; // 下游（左側）管底位置
+            // 背景網格 (選用)
+            svgContent += `<defs>
+                <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
+                    <path d="M 20 0 L 0 0 0 20" fill="none" stroke="#f1f5f9" stroke-width="1"/>
+                </pattern>
+            </defs>
+            <rect width="100%" height="100%" fill="url(#grid)" />`;
 
-                // 設定管線位置和角度
-                pipe.style.left = `${endX}px`;
-                pipe.style.top = `${downstreamY}px`;
-                pipe.style.width = `${pipeLength}px`;
-
-                // 計算角度（從下游指向上游）
-                const angle = Math.atan2(upstreamY - downstreamY, pipeLength) * 180 / Math.PI;
-                pipe.style.transform = `rotate(${angle}deg)`;
-                pipe.style.transformOrigin = 'left center';
-            }
-
-            updateLabels();
-        }
-
-        function updateLabels() {
-            document.getElementById('labelGL1').textContent = `GL: ${data.gl1 !== null ? data.gl1.toFixed(2) : '--'} m`;
-            document.getElementById('labelINV1').textContent = `INV: ${data.inv1 !== null ? data.inv1.toFixed(2) : '--'} m`;
-            document.getElementById('labelDepth1').textContent = `Depth: ${data.depth1 !== null ? data.depth1.toFixed(2) : '--'} m`;
-            
-            document.getElementById('labelGL2').textContent = `GL: ${data.gl2 !== null ? data.gl2.toFixed(2) : '--'} m`;
-            document.getElementById('labelINV2').textContent = `INV: ${data.inv2 !== null ? data.inv2.toFixed(2) : '--'} m`;
-            document.getElementById('labelDepth2').textContent = `Depth: ${data.depth2 !== null ? data.depth2.toFixed(2) : '--'} m`;
-            
-            document.getElementById('labelLength').textContent = `L: ${data.length !== null ? data.length.toFixed(2) : '--'} m`;
-            document.getElementById('labelSlope').textContent = `S: ${data.slope !== null ? data.slope.toFixed(2) : '--'} %`;
-        }
-
-        function reset() {
-            // 清空數據
-            Object.keys(data).forEach(key => {
-                data[key] = null;
-            });
-
-            // 清空輸入框並移除calculated類
-            const inputs = document.querySelectorAll('input');
-            inputs.forEach(input => {
-                input.value = '';
-                input.classList.remove('calculated');
-            });
-
-            // 隱藏錯誤信息
-            const errorDiv = document.getElementById('errorMessages');
-            if (errorDiv) {
-                errorDiv.style.display = 'none';
-            }
-
-            // 重設視覺化
-            document.getElementById('manholeLeft').style.height = '150px';
-            document.getElementById('manholeRight').style.height = '120px';
-            document.getElementById('pipe').style.transform = 'rotate(0deg)';
-            document.getElementById('pipe').style.width = '0px';
-
-            updateLabels();
-        }
-
-        // 初始化
-        document.addEventListener('DOMContentLoaded', function() {
-            updateLabels();
-        });
-
-        // 添加實時輸入監聽
-        document.querySelectorAll('input').forEach(input => {
-            input.addEventListener('input', function() {
-                this.classList.remove('calculated');
-            });
-        });
-    </script>
-</body>
-</html>
+            // --- 繪製 GL (地面線) ---
+            svgContent += `<line x1="${xDown-50}" y1="${yGDown}" x2="${xUp+50}" y2="${yGUp}" class="svg-ground" />`;
+            svgContent += `<text x="${xDown-40}" y="${yGDown-10}" class="svg-text" fill="#64748b">GL:${drawGDown.toFixed(2)}</text>`;
+            svgContent += `<text x="${xUp+10}" y="${yGU
