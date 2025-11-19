@@ -3,262 +3,315 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>股票變化率計算器</title>
+    <title>台股損益與目標價試算</title>
     <style>
+        :root {
+            --tw-red: #e74c3c;
+            --tw-green: #27ae60;
+            --tw-gray: #7f8c8d;
+            --bg-color: #f0f2f5;
+            --card-bg: #ffffff;
+        }
+
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: '微軟正黑體', 'Segoe UI', sans-serif;
             display: flex;
-            flex-direction: column; /* Default to column for small screens */
-            justify-content: flex-start; /* Align content to top */
-            align-items: center; /* Center content horizontally */
+            flex-direction: column;
+            align-items: center;
             min-height: 100vh;
-            background-color: #f4f7f6;
+            background-color: var(--bg-color);
             margin: 0;
-            padding: 20px; /* Add some padding around the content */
-            color: #333;
-            box-sizing: border-box; /* Include padding in element's total width and height */
-        }
-        h1 {
-            text-align: center;
-            color: #2c3e50;
-            margin-bottom: 25px;
-            font-size: 1.8em;
-            width: 100%; /* Ensure title takes full width */
-            max-width: 900px; /* Match max-width of the container for alignment */
-        }
-        .main-content-wrapper {
-            background-color: #fff;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-            width: 100%;
-            max-width: 900px; /* Overall max width for the two columns */
-            box-sizing: border-box;
-            display: flex;
-            flex-direction: column; /* Default stacked layout for mobile */
-            gap: 20px; /* Space between the two sections when stacked or side-by-side */
-        }
-        .calculator-section {
             padding: 20px;
-            border: 1px solid #e0e0e0;
-            border-radius: 8px;
-            background-color: #fafafa;
-            /* Flex properties for responsiveness - will adjust in media query */
-            flex: 1 1 auto; /* Allow items to grow/shrink and take auto width */
+            color: #333;
         }
-        .calculator-section h2 {
-            margin-top: 0;
-            color: #34495e;
-            font-size: 1.3em;
-            border-bottom: 2px solid #a0a0a0;
-            padding-bottom: 10px;
+
+        h1 {
+            color: #2c3e50;
             margin-bottom: 20px;
+            font-size: 1.6em;
+            text-align: center;
         }
+
+        .container {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+            width: 100%;
+            max-width: 900px;
+        }
+
+        @media (min-width: 768px) {
+            .container {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card h2 {
+            margin: 0 0 20px 0;
+            color: #34495e;
+            font-size: 1.2em;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+        }
+
         label {
             display: block;
-            margin-bottom: 8px;
-            font-weight: bold;
+            margin-bottom: 5px;
+            font-weight: 600;
             color: #555;
+            font-size: 0.95em;
         }
+
         input[type="number"] {
-            width: calc(100% - 22px);
-            padding: 10px;
-            margin-bottom: 15px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            box-sizing: border-box;
-            font-size: 1em;
-        }
-        input[type="number"]:focus {
-            border-color: #007bff;
-            outline: none;
-            box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
-        }
-        button {
-            background-color: #007bff;
-            color: white;
-            padding: 12px 20px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 1.1em;
             width: 100%;
-            transition: background-color 0.3s ease;
-        }
-        button:hover {
-            background-color: #0056b3;
-        }
-        button:active {
-            background-color: #004085;
-        }
-        .result {
-            margin-top: 20px;
-            padding: 15px;
-            border-radius: 5px;
-            font-size: 1.2em;
-            font-weight: bold;
-            text-align: center;
-            word-wrap: break-word;
-            min-height: 20px; /* Ensure some height even when empty */
-            display: flex; /* Use flex to center text vertically */
-            align-items: center;
-            justify-content: center;
-        }
-        /* Result colors */
-        .result.positive {
-            background-color: #d4edda; /* Light Green */
-            color: #155724; /* Dark Green */
-        }
-        .result.negative {
-            background-color: #f8d7da; /* Light Red */
-            color: #721c24; /* Dark Red */
-        }
-        .result.neutral {
-            background-color: #fff3cd; /* Light Yellow/Orange */
-            color: #856404; /* Dark Yellow/Orange */
-        }
-
-        /* Media Query for wider screens (e.g., tablets and desktops) */
-        @media (min-width: 768px) {
-            .main-content-wrapper {
-                flex-direction: row; /* Arrange items side-by-side */
-                justify-content: space-between; /* Distribute space evenly */
-            }
-            .calculator-section {
-                /* Each section takes about half the width, accounting for the gap */
-                flex: 1 1 calc(50% - 10px); /* 10px is half of the 20px gap */
-            }
-        }
-
-        /* Further adjustments for even larger screens, like specific 16:9 desktops */
-        @media (min-width: 1024px) {
-             .main-content-wrapper, h1 {
-                max-width: 1000px; /* Slightly wider for very large screens */
-            }
-        }
-
-        /* Ensure input and button are centered vertically within their own space if needed */
-        .calculator-section > * {
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 1.1em;
             box-sizing: border-box;
+            transition: border-color 0.3s;
         }
+
+        input[type="number"]:focus {
+            border-color: #3498db;
+            outline: none;
+        }
+
+        /* 快捷按鈕區域 */
+        .quick-btns {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+        }
+
+        .btn-tag {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            cursor: pointer;
+            border: 1px solid #ddd;
+            background: #fff;
+            transition: all 0.2s;
+        }
+        
+        .btn-tag:hover { background-color: #eee; }
+        .btn-tag.red { color: var(--tw-red); border-color: var(--tw-red); }
+        .btn-tag.green { color: var(--tw-green); border-color: var(--tw-green); }
+        .btn-tag.red:hover { background-color: #fdeaea; }
+        .btn-tag.green:hover { background-color: #eafaf1; }
+
+        .result-box {
+            margin-top: auto; /* Push to bottom */
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            text-align: center;
+            border: 1px solid #eee;
+        }
+
+        .main-value {
+            font-size: 2em;
+            font-weight: 800;
+            margin: 5px 0;
+            font-family: 'Arial', sans-serif;
+        }
+
+        .sub-info {
+            font-size: 0.95em;
+            color: #666;
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .info-item {
+            text-align: center;
+            flex: 1;
+        }
+        .info-item span { display: block; }
+        .info-label { font-size: 0.8em; color: #888; }
+        .info-val { font-weight: bold; font-size: 1.1em; }
+
+        /* 台股顏色邏輯 */
+        .text-up { color: var(--tw-red) !important; }
+        .text-down { color: var(--tw-green) !important; }
+        .text-flat { color: var(--tw-gray) !important; }
+        .bg-up { background-color: #fdeaea !important; border-color: #fadbd8 !important; }
+        .bg-down { background-color: #eafaf1 !important; border-color: #d5f5e3 !important; }
+
     </style>
 </head>
 <body>
-    <h1>股票變化率計算器</h1>
+    <h1>📈 台股損益與目標價試算</h1>
 
-    <div class="main-content-wrapper">
-        <!-- 計算漲跌變化率 -->
-        <div class="calculator-section">
-            <h2>1. 計算漲跌變化率 (%)</h2>
-            <label for="initialPrice">原始股價:</label>
-            <input type="number" id="initialPrice" placeholder="例如: 47.02" min="0" step="0.01">
+    <div class="container">
+        <!-- 左側：計算漲跌幅與損益 -->
+        <div class="card">
+            <h2>1. 計算漲跌與損益</h2>
+            
+            <div class="input-group">
+                <label>買進價格 (Cost)</label>
+                <input type="number" id="buyPrice" placeholder="輸入買進價" inputmode="decimal" step="0.01">
+            </div>
 
-            <label for="finalPrice">最終股價:</label>
-            <input type="number" id="finalPrice" placeholder="例如: 46.1" min="0" step="0.01">
+            <div class="input-group">
+                <label>目前/賣出價格 (Current)</label>
+                <input type="number" id="sellPrice" placeholder="輸入目前價" inputmode="decimal" step="0.01">
+            </div>
 
-            <button onclick="calculateChangeRate()">計算變化率</button>
-            <div id="changeRateResult" class="result"></div>
+            <div id="resultBox1" class="result-box">
+                <div class="info-label">漲跌幅 (Percentage)</div>
+                <div id="resRate" class="main-value text-flat">0.00%</div>
+                
+                <div class="sub-info">
+                    <div class="info-item">
+                        <span class="info-label">價差</span>
+                        <span id="resDiff" class="info-val text-flat">0.00</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">一張損益 (未含手續費)</span>
+                        <span id="resProfit" class="info-val text-flat">$0</span>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <!-- 推估目標股價 -->
-        <div class="calculator-section">
-            <h2>2. 推估目標股價</h2>
-            <label for="basePrice">原始股價:</label>
-            <input type="number" id="basePrice" placeholder="例如: 47.02" min="0" step="0.01">
+        <!-- 右側：推估目標價 -->
+        <div class="card">
+            <h2>2. 推估目標價格</h2>
+            
+            <div class="input-group">
+                <label>基準價格 (Base)</label>
+                <input type="number" id="basePrice" placeholder="輸入基準價" inputmode="decimal" step="0.01">
+            </div>
 
-            <label for="percentageChange">預期變化率 (%):</label>
-            <input type="number" id="percentageChange" placeholder="例如: 20 (漲20%) 或 -10 (跌10%)" step="0.01">
+            <div class="input-group">
+                <label>預期漲跌幅 (%)</label>
+                <div class="quick-btns">
+                    <button class="btn-tag red" onclick="setPercent(10)">+10% (漲停)</button>
+                    <button class="btn-tag red" onclick="setPercent(5)">+5%</button>
+                    <button class="btn-tag" onclick="setPercent(0)">平盤</button>
+                    <button class="btn-tag green" onclick="setPercent(-5)">-5%</button>
+                    <button class="btn-tag green" onclick="setPercent(-10)">-10% (跌停)</button>
+                </div>
+                <input type="number" id="targetPercent" placeholder="輸入 % 數" inputmode="decimal" step="0.1">
+            </div>
 
-            <button onclick="estimateTargetPrice()">推估目標價</button>
-            <div id="targetPriceResult" class="result"></div>
+            <div id="resultBox2" class="result-box">
+                <div class="info-label">目標股價 (Target Price)</div>
+                <div id="resTargetPrice" class="main-value text-flat">0.00</div>
+
+                <div class="sub-info">
+                    <div class="info-item">
+                        <span class="info-label">預期價差</span>
+                        <span id="resTargetDiff" class="info-val text-flat">0.00</span>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
     <script>
-        function resetResultClasses(elementId) {
-            const element = document.getElementById(elementId);
-            element.classList.remove('positive', 'negative', 'neutral');
+        // 初始化選取元素
+        const els = {
+            buy: document.getElementById('buyPrice'),
+            sell: document.getElementById('sellPrice'),
+            resRate: document.getElementById('resRate'),
+            resDiff: document.getElementById('resDiff'),
+            resProfit: document.getElementById('resProfit'),
+            resBox1: document.getElementById('resultBox1'),
+            
+            base: document.getElementById('basePrice'),
+            percent: document.getElementById('targetPercent'),
+            resTarget: document.getElementById('resTargetPrice'),
+            resTargetDiff: document.getElementById('resTargetDiff'),
+            resBox2: document.getElementById('resultBox2')
+        };
+
+        // 監聽輸入事件 (即時計算)
+        [els.buy, els.sell].forEach(input => input.addEventListener('input', calcProfit));
+        [els.base, els.percent].forEach(input => input.addEventListener('input', calcTarget));
+
+        // 工具函式：設定顏色
+        function updateStyle(value, ...elements) {
+            elements.forEach(el => {
+                el.classList.remove('text-up', 'text-down', 'text-flat', 'bg-up', 'bg-down');
+                if (value > 0) {
+                    el.classList.add(el.classList.contains('result-box') ? 'bg-up' : 'text-up');
+                } else if (value < 0) {
+                    el.classList.add(el.classList.contains('result-box') ? 'bg-down' : 'text-down');
+                } else {
+                    el.classList.add('text-flat');
+                }
+            });
         }
 
-        function setResultClass(elementId, value) {
-            const element = document.getElementById(elementId);
-            resetResultClasses(elementId);
-            if (value > 0) {
-                element.classList.add('positive');
-            } else if (value < 0) {
-                element.classList.add('negative');
+        // 左側計算邏輯
+        function calcProfit() {
+            const buy = parseFloat(els.buy.value);
+            const sell = parseFloat(els.sell.value);
+
+            if (!isNaN(buy) && !isNaN(sell) && buy > 0) {
+                const diff = sell - buy;
+                const rate = (diff / buy) * 100;
+                const profit = diff * 1000; // 一張 = 1000股
+
+                // 顯示數值
+                els.resRate.textContent = (rate > 0 ? '+' : '') + rate.toFixed(2) + '%';
+                els.resDiff.textContent = (diff > 0 ? '+' : '') + diff.toFixed(2);
+                els.resProfit.textContent = '$' + Math.round(profit).toLocaleString();
+
+                // 更新顏色
+                updateStyle(diff, els.resRate, els.resDiff, els.resProfit, els.resBox1);
             } else {
-                element.classList.add('neutral');
+                // 清空或無效時重置
+                els.resRate.textContent = '0.00%';
+                els.resDiff.textContent = '0.00';
+                els.resProfit.textContent = '$0';
+                updateStyle(0, els.resRate, els.resDiff, els.resProfit, els.resBox1);
             }
         }
 
-        function calculateChangeRate() {
-            const initialPriceInput = document.getElementById('initialPrice');
-            const finalPriceInput = document.getElementById('finalPrice');
-            const resultDiv = document.getElementById('changeRateResult');
+        // 右側計算邏輯
+        function calcTarget() {
+            const base = parseFloat(els.base.value);
+            const pct = parseFloat(els.percent.value);
 
-            const initialPrice = parseFloat(initialPriceInput.value);
-            const finalPrice = parseFloat(finalPriceInput.value);
+            if (!isNaN(base) && !isNaN(pct)) {
+                const targetPrice = base * (1 + (pct / 100));
+                const diff = targetPrice - base;
 
-            resetResultClasses('changeRateResult');
-            resultDiv.textContent = ''; // Clear previous result
+                els.resTarget.textContent = targetPrice.toFixed(2);
+                els.resTargetDiff.textContent = (diff > 0 ? '+' : '') + diff.toFixed(2);
 
-            if (initialPriceInput.value === '' || finalPriceInput.value === '') {
-                 resultDiv.textContent = '請輸入原始股價與最終股價。';
-                 resultDiv.classList.add('neutral');
-                 return;
+                updateStyle(pct, els.resTarget, els.resTargetDiff, els.resBox2);
+            } else {
+                els.resTarget.textContent = '0.00';
+                els.resTargetDiff.textContent = '0.00';
+                updateStyle(0, els.resTarget, els.resTargetDiff, els.resBox2);
             }
-
-            if (isNaN(initialPrice) || isNaN(finalPrice)) {
-                resultDiv.textContent = '請輸入有效的數字。';
-                resultDiv.classList.add('neutral');
-                return;
-            }
-            if (initialPrice <= 0) {
-                resultDiv.textContent = '原始股價必須大於0。';
-                resultDiv.classList.add('negative');
-                return;
-            }
-
-            const change = finalPrice - initialPrice;
-            const changeRate = (change / initialPrice) * 100;
-
-            resultDiv.textContent = `變化率: ${changeRate.toFixed(2)}%`;
-            setResultClass('changeRateResult', changeRate);
         }
 
-        function estimateTargetPrice() {
-            const basePriceInput = document.getElementById('basePrice');
-            const percentageChangeInput = document.getElementById('percentageChange');
-            const resultDiv = document.getElementById('targetPriceResult');
-
-            const basePrice = parseFloat(basePriceInput.value);
-            const percentageChange = parseFloat(percentageChangeInput.value);
-
-            resetResultClasses('targetPriceResult');
-            resultDiv.textContent = ''; // Clear previous result
-
-            if (basePriceInput.value === '' || percentageChangeInput.value === '') {
-                 resultDiv.textContent = '請輸入原始股價與預期變化率。';
-                 resultDiv.classList.add('neutral');
-                 return;
-            }
-
-            if (isNaN(basePrice) || isNaN(percentageChange)) {
-                resultDiv.textContent = '請輸入有效的數字。';
-                resultDiv.classList.add('neutral');
-                return;
-            }
-            if (basePrice <= 0) {
-                resultDiv.textContent = '原始股價必須大於0。';
-                resultDiv.classList.add('negative');
-                return;
-            }
-
-            const targetPrice = basePrice * (1 + (percentageChange / 100));
-
-            resultDiv.textContent = `目標股價: ${targetPrice.toFixed(2)}`;
-            setResultClass('targetPriceResult', percentageChange); // Use percentageChange to determine color
+        // 快捷按鈕功能
+        function setPercent(val) {
+            els.percent.value = val;
+            calcTarget(); // 設定後手動觸發一次計算
         }
     </script>
 </body>
