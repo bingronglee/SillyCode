@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SillyCode 工具箱</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;       /* 深藍背景 */
+            --card-bg: #1e293b;        /* 卡片背景 */
+            --text-primary: #f1f5f9;   /* 主要文字 */
+            --text-secondary: #94a3b8; /* 次要文字 */
+            --accent: #38bdf8;         /* 亮藍色點綴 */
+            --hover-bg: #334155;       /* 滑鼠懸停背景 */
+        }
+
+        body {
+            font-family: 'Microsoft JhengHei', 'Segoe UI', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* 標題區域 */
+        header {
+            text-align: center;
+            padding: 60px 20px;
+            width: 100%;
+            max-width: 800px;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #38bdf8, #818cf8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        p.subtitle {
+            color: var(--text-secondary);
+            font-size: 1.1em;
+            line-height: 1.6;
+        }
+
+        /* 網格佈局 */
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            width: 90%;
+            max-width: 1000px;
+            padding-bottom: 50px;
+        }
+
+        /* 卡片樣式 */
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid #334155;
+            border-radius: 12px;
+            padding: 25px;
+            text-decoration: none; /* 去除連結底線 */
+            color: inherit;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            background-color: var(--hover-bg);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+            border-color: var(--accent);
+        }
+
+        .card-icon {
+            font-size: 2.5em;
+            margin-bottom: 15px;
+        }
+
+        .card-title {
+            font-size: 1.25em;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: var(--accent);
+        }
+
+        .card-desc {
+            font-size: 0.9em;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        /* 頁尾 */
+        footer {
+            margin-top: auto;
+            padding: 20px;
+            color: #64748b;
+            font-size: 0.9em;
+        }
+
+        a.github-link {
+            color: #64748b;
+            text-decoration: none;
+            border-bottom: 1px dashed #64748b;
+        }
+        a.github-link:hover {
+            color: var(--accent);
+            border-color: var(--accent);
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>SillyCode 工具箱</h1>
+        <p class="subtitle">這裡存放著我開發的各種實用小工具。<br>點擊卡片即可進入對應功能。</p>
+    </header>
+
+    <div class="grid-container">
+        
+        <!-- 工具 1：污水管線計算 -->
+        <a href="cal.html" class="card">
+            <div class="card-icon">💧</div>
+            <div class="card-title">污水管線縱斷面</div>
+            <div class="card-desc">
+                輸入上游下游高程、坡度與長度，自動計算管底高程並繪製視覺化圖形 (含重力流檢核)。
+            </div>
+        </a>
+
+        <!-- 工具 2：股票試算 -->
+        <a href="stock_cal.html" class="card">
+            <div class="card-icon">📈</div>
+            <div class="card-title">台股損益試算</div>
+            <div class="card-desc">
+                快速計算股票漲跌幅、損益金額，以及漲跌停目標價格推算。
+            </div>
+        </a>
+
+        <!-- 工具 3：待辦事項 -->
+        <a href="to-do.html" class="card">
+            <div class="card-icon">📝</div>
+            <div class="card-title">待辦事項清單</div>
+            <div class="card-desc">
+                簡單好用的 To-Do List，協助管理日常任務與工作進度。
+            </div>
+        </a>
+
+        <!-- 工具 4：哥布林 (根據你的截圖猜測) -->
+        <a href="Goblin.html" class="card">
+            <div class="card-icon">👺</div>
+            <div class="card-title">Goblin</div>
+            <div class="card-desc">
+                測試用的頁面或其他功能展示 (點擊進入)。
+            </div>
+        </a>
+
+        <!-- 工具 5：滑雪行程 -->
+        <a href="Ski_trip.html" class="card">
+            <div class="card-icon">🎿</div>
+            <div class="card-title">滑雪行程規劃</div>
+            <div class="card-desc">
+                滑雪旅遊的相關行程安排與資訊頁面。
+            </div>
+        </a>
+
+        <!-- 工具 6：行程表 -->
+        <a href="Trip_Schedule.html" class="card">
+            <div class="card-icon">✈️</div>
+            <div class="card-title">旅遊行程表</div>
+            <div class="card-desc">
+                一般的旅遊行程規劃與時間表檢視。
+            </div>
+        </a>
+
+    </div>
+
+    <footer>
+        <p>Designed by bingronglee | <a href="https://github.com/bingronglee/SillyCode" class="github-link">View on GitHub</a></p>
+    </footer>
+
+</body>
+</html>
