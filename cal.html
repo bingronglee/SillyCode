@@ -35,6 +35,7 @@
             margin-bottom: 20px;
             border-bottom: 2px solid var(--accent-blue);
             padding-bottom: 10px;
+            text-align: center;
         }
 
         .container {
@@ -47,7 +48,7 @@
 
         /* 繪圖區域 */
         .visualization-box {
-            background-color: #fff; /* 圖紙背景白 */
+            background-color: #fff;
             border-radius: 8px;
             padding: 10px;
             height: 400px;
@@ -62,7 +63,7 @@
             display: block;
         }
 
-        /* 輸入控制區域 */
+        /* 控制面板 */
         .control-panel {
             display: grid;
             grid-template-columns: 1fr 1.2fr 1fr;
@@ -128,7 +129,6 @@
             border-color: var(--accent-blue);
         }
         
-        /* 自動計算出的數值樣式 */
         input.auto-filled {
             color: var(--accent-green);
             font-weight: bold;
@@ -168,13 +168,13 @@
         button:hover { opacity: 0.9; transform: translateY(-1px); }
         button:active { transform: translateY(1px); }
 
-        /* 警告訊息 */
         .status-msg {
             grid-column: 1 / -1;
             text-align: center;
             min-height: 24px;
             font-weight: bold;
             font-size: 0.9em;
+            margin-top: 10px;
         }
         .error { color: var(--accent-red); }
         .info { color: var(--accent-green); }
@@ -189,11 +189,7 @@
         /* SVG Styles */
         .svg-ground { stroke: #64748b; stroke-width: 2; stroke-dasharray: 5,5; }
         .svg-manhole { fill: #e2e8f0; stroke: #334155; stroke-width: 2; }
-        .svg-pipe { stroke: #f97316; stroke-width: 4; }
-        .svg-water { stroke: #38bdf8; stroke-width: 2; stroke-dasharray: 2,2; }
         .svg-text { font-size: 12px; fill: #334155; font-family: monospace; }
-        .svg-dim { stroke: #94a3b8; stroke-width: 1; }
-        .highlight-bg { fill: #fef3c7; } /* 標示坡度異常 */
     </style>
 </head>
 <body>
@@ -201,22 +197,18 @@
     <h1>污水管線縱斷面計算機</h1>
 
     <div class="container">
-        <!-- 圖形顯示區 -->
         <div class="visualization-box" id="visBox">
             <svg id="mainSvg" viewBox="0 0 800 400" preserveAspectRatio="xMidYMid meet">
-                <!-- 內容將由 JS 動態生成 -->
-                <text x="400" y="200" text-anchor="middle" fill="#94a3b8">請輸入數據並點擊計算</text>
+                <text x="400" y="200" text-anchor="middle" fill="#94a3b8">初始化中...</text>
             </svg>
         </div>
 
         <div class="status-msg" id="statusMsg"></div>
 
-        <!-- 控制面板 -->
         <div class="control-panel">
-            
             <!-- 下游 (左側) -->
             <div class="panel-section downstream">
-                <h3>下游人孔 (左/Out)</h3>
+                <h3>下游人孔 (Out)</h3>
                 <div class="input-group">
                     <label>地面 (GL)</label>
                     <div class="input-wrapper">
@@ -268,7 +260,7 @@
 
             <!-- 上游 (右側) -->
             <div class="panel-section upstream">
-                <h3>上游人孔 (右/In)</h3>
+                <h3>上游人孔 (In)</h3>
                 <div class="input-group">
                     <label>地面 (GL)</label>
                     <div class="input-wrapper">
@@ -293,51 +285,85 @@
             </div>
 
             <div class="btn-area">
-                <button class="btn-calc" onclick="calculateAll()">計算並繪圖 (Calculate)</button>
-                <button class="btn-reset" onclick="resetAll()">清除重設 (Reset)</button>
+                <button class="btn-calc" onclick="calculateAll()">計算並繪圖</button>
+                <button class="btn-reset" onclick="resetAll()">清除重設</button>
             </div>
         </div>
     </div>
 
     <script>
-        // 取得所有輸入框 DOM
-        const els = {
-            gl_down: document.getElementById('gl_down'),
-            inv_down: document.getElementById('inv_down'),
-            depth_down: document.getElementById('depth_down'),
+        // 將 DOM 元素儲存在這個物件中，但在 load 時才賦值
+        let els = {};
+
+        // 初始化函數
+        function init() {
+            // 1. 綁定所有 DOM 元素
+            els = {
+                gl_down: document.getElementById('gl_down'),
+                inv_down: document.getElementById('inv_down'),
+                depth_down: document.getElementById('depth_down'),
+                
+                length: document.getElementById('length'),
+                slope: document.getElementById('slope'),
+                fall: document.getElementById('fall'),
+
+                gl_up: document.getElementById('gl_up'),
+                inv_up: document.getElementById('inv_up'),
+                depth_up: document.getElementById('depth_up'),
+
+                svg: document.getElementById('mainSvg'),
+                msg: document.getElementById('statusMsg')
+            };
+
+            // 2. 綁定 Input 清除樣式事件
+            document.querySelectorAll('input').forEach(input => {
+                input.addEventListener('input', () => input.classList.remove('auto-filled'));
+            });
+
+            // 3. 載入範例數據 (這就是您要的功能)
+            loadExampleData();
+        }
+
+        // 載入範例數據
+        function loadExampleData() {
+            if(!els.inv_up) return; // 雙重確認
+
+            // 設定一組合理的範例數據
+            els.gl_up.value = "10.50";
+            els.inv_up.value = "8.00"; // 上游管底
             
-            length: document.getElementById('length'),
-            slope: document.getElementById('slope'),
-            fall: document.getElementById('fall'),
+            els.length.value = "40.00"; // 管長 40m
+            els.slope.value = "2.00";   // 坡度 2%
+            
+            // 右側 (下游) GL 預設一樣
+            els.gl_down.value = "10.50"; 
 
-            gl_up: document.getElementById('gl_up'),
-            inv_up: document.getElementById('inv_up'),
-            depth_up: document.getElementById('depth_up'),
+            // 觸發計算，這樣一打開就會有圖
+            calculateAll();
+            
+            // 顯示歡迎訊息
+            els.msg.innerHTML = "ℹ️ 已載入範例數據，請輸入您的數值進行計算。";
+            els.msg.classList.add('info');
+        }
 
-            svg: document.getElementById('mainSvg'),
-            msg: document.getElementById('statusMsg')
-        };
+        // 等待網頁完全載入後才執行初始化
+        window.addEventListener('DOMContentLoaded', init);
 
-        // 取得數值 (Helper function)
+        // --- 以下為計算邏輯 (與之前相同) ---
+
         const val = (id) => {
             const v = parseFloat(els[id].value);
             return isNaN(v) ? null : v;
         };
 
-        // 設定數值並標記樣式
         const setVal = (id, v, isAuto = true) => {
             const el = els[id];
-            el.value = v.toFixed(3); // 工程通常取小數點後三位
+            el.value = v.toFixed(3); 
             if (isAuto) {
                 el.classList.add('auto-filled');
-                setTimeout(() => el.classList.remove('auto-filled'), 2000); // 閃爍效果
+                setTimeout(() => el.classList.remove('auto-filled'), 2000);
             }
         };
-
-        // 清除樣式監聽
-        document.querySelectorAll('input').forEach(input => {
-            input.addEventListener('input', () => input.classList.remove('auto-filled'));
-        });
 
         function resetAll() {
             document.querySelectorAll('input').forEach(i => i.value = '');
@@ -345,13 +371,10 @@
             els.msg.textContent = '';
         }
 
-        // 核心計算邏輯
         function calculateAll() {
             els.msg.textContent = '';
             els.msg.className = 'status-msg';
 
-            // 1. 處理地面高程 (GL) 邏輯
-            // 規則：如果都沒填，暫時不處理（繪圖時給假定值）。如果填了一個，另一個預設相等。
             let gUp = val('gl_up');
             let gDown = val('gl_down');
             
@@ -363,41 +386,33 @@
                 setVal('gl_up', gUp);
             }
 
-            // 2. 處理管線幾何計算 (知三求一)
-            // 變數：inv_up, inv_down, length, slope
             let iUp = val('inv_up');
             let iDown = val('inv_down');
             let L = val('length');
             let S = val('slope');
 
-            // 邏輯判斷迴圈 (簡單的一次性判斷)
             try {
-                // 情況 A: 已知兩端高程 -> 算 Fall
                 if (iUp !== null && iDown !== null) {
                     const fall = iUp - iDown;
                     setVal('fall', fall);
                     
-                    // 如果有長度，算坡度
                     if (L !== null && S === null) {
                         if (L <= 0) throw "管線長度必須大於 0";
                         S = (fall / L) * 100;
                         setVal('slope', S);
                     } 
-                    // 如果有坡度，算長度 (較少見，但可算)
                     else if (S !== null && L === null) {
                         if (S === 0) throw "坡度為 0 無法反推長度";
                         L = (fall / (S/100));
                         setVal('length', L);
                     }
                 }
-                // 情況 B: 已知上游 + 長度 + 坡度 -> 算下游
                 else if (iUp !== null && L !== null && S !== null && iDown === null) {
                     const fall = L * (S / 100);
                     iDown = iUp - fall;
                     setVal('inv_down', iDown);
                     setVal('fall', fall);
                 }
-                // 情況 C: 已知下游 + 長度 + 坡度 -> 算上游
                 else if (iDown !== null && L !== null && S !== null && iUp === null) {
                     const fall = L * (S / 100);
                     iUp = iDown + fall;
@@ -410,17 +425,14 @@
                 return;
             }
 
-            // 重新抓取計算後的值
             iUp = val('inv_up');
             iDown = val('inv_down');
             gUp = val('gl_up');
             gDown = val('gl_down');
 
-            // 3. 計算深度 (Depth)
             if (iUp !== null && gUp !== null) setVal('depth_up', gUp - iUp, false);
             if (iDown !== null && gDown !== null) setVal('depth_down', gDown - iDown, false);
 
-            // 4. 驗證與警告
             if (iUp !== null && iDown !== null && iUp < iDown) {
                 els.msg.innerHTML = "⚠️ 警告：發生逆坡 (上游高程低於下游)，請檢查數據！";
                 els.msg.classList.add('error');
@@ -429,67 +441,73 @@
                 els.msg.classList.add('info');
             }
 
-            // 5. 執行繪圖
             drawSVG(gUp, gDown, iUp, iDown, L, S);
         }
 
-        // SVG 繪圖邏輯
         function drawSVG(gUp, gDown, iUp, iDown, L, S) {
             if (iUp === null || iDown === null) return;
 
-            // 如果沒有 GL，為了繪圖美觀，假定 GL = 最高 INV + 2m
             const maxInv = Math.max(iUp, iDown);
             let drawGUp = gUp !== null ? gUp : maxInv + 2.5;
             let drawGDown = gDown !== null ? gDown : maxInv + 2.5;
 
-            // 1. 定義畫布邊界與座標系
             const w = 800;
             const h = 400;
             const padding = 60;
-            const chartW = w - padding * 2;
             const chartH = h - padding * 2;
 
-            // 2. 計算 Y 軸縮放比例 (Vertical Scale)
-            // 找出最大與最小高程 (包含 INV 和 GL)
             const maxEl = Math.max(drawGUp, drawGDown);
             const minEl = Math.min(iUp, iDown);
             let diffEl = maxEl - minEl;
-            if (diffEl < 1) diffEl = 1; // 避免高程差太小導致爆掉
+            if (diffEl < 1) diffEl = 1; 
 
-            // 每公尺代表多少像素 (保留上下緩衝)
             const scaleY = chartH / (diffEl * 1.2); 
-            
-            // Y軸轉換函數 (高程 -> 像素 Y)
-            // SVG Y軸向下是正，所以要反轉：PixelY = Padding + (MaxEl - TargetEl) * scale
-            const getY = (el) => padding + (maxEl - el) * scaleY + (padding * 0.5); // 稍微往下移一點
+            const getY = (el) => padding + (maxEl - el) * scaleY + (padding * 0.5);
 
-            // X軸位置 (固定)
-            const xDown = padding + 50;      // 左側人孔中心 (下游)
-            const xUp = w - padding - 50;    // 右側人孔中心 (上游)
-            const mhWidth = 60;              // 人孔寬度
+            const xDown = padding + 50;
+            const xUp = w - padding - 50;
+            const mhWidth = 60;
 
-            // 座標計算
             const yGDown = getY(drawGDown);
             const yGUp = getY(drawGUp);
             const yIDown = getY(iDown);
             const yIUp = getY(iUp);
 
-            // 顏色定義
             const isBackPitch = iUp < iDown;
-            const pipeColor = isBackPitch ? '#ef4444' : '#f97316'; // 逆坡變紅
+            const pipeColor = isBackPitch ? '#ef4444' : '#f97316'; 
 
-            // 構建 SVG 內容
             let svgContent = ``;
+            svgContent += `<defs><pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse"><path d="M 20 0 L 0 0 0 20" fill="none" stroke="#f1f5f9" stroke-width="1"/></pattern></defs><rect width="100%" height="100%" fill="url(#grid)" />`;
 
-            // 背景網格 (選用)
-            svgContent += `<defs>
-                <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
-                    <path d="M 20 0 L 0 0 0 20" fill="none" stroke="#f1f5f9" stroke-width="1"/>
-                </pattern>
-            </defs>
-            <rect width="100%" height="100%" fill="url(#grid)" />`;
-
-            // --- 繪製 GL (地面線) ---
             svgContent += `<line x1="${xDown-50}" y1="${yGDown}" x2="${xUp+50}" y2="${yGUp}" class="svg-ground" />`;
             svgContent += `<text x="${xDown-40}" y="${yGDown-10}" class="svg-text" fill="#64748b">GL:${drawGDown.toFixed(2)}</text>`;
-            svgContent += `<text x="${xUp+10}" y="${yGU
+            svgContent += `<text x="${xUp+10}" y="${yGUp-10}" class="svg-text" fill="#64748b">GL:${drawGUp.toFixed(2)}</text>`;
+
+            svgContent += `<rect x="${xDown - mhWidth/2}" y="${yGDown}" width="${mhWidth}" height="${yIDown - yGDown}" class="svg-manhole" />`;
+            svgContent += `<rect x="${xUp - mhWidth/2}" y="${yGUp}" width="${mhWidth}" height="${yIUp - yGUp}" class="svg-manhole" />`;
+
+            svgContent += `<line x1="${xUp - mhWidth/2}" y1="${yIUp}" x2="${xDown + mhWidth/2}" y2="${yIDown}" stroke="${pipeColor}" stroke-width="6" stroke-linecap="round" />`;
+            
+            const mx = (xDown + xUp) / 2;
+            const my = (yIDown + yIUp) / 2;
+            if (!isBackPitch) {
+                svgContent += `<polygon points="${mx},${my-5} ${mx-10},${my} ${mx},${my+5}" fill="${pipeColor}" />`;
+            } else {
+                svgContent += `<text x="${mx}" y="${my-15}" text-anchor="middle" fill="red" font-weight="bold" font-size="20">⚠️</text>`;
+            }
+
+            svgContent += `<text x="${xDown - mhWidth/2 - 10}" y="${yIDown+5}" text-anchor="end" class="svg-text" font-weight="bold">INV:${iDown.toFixed(2)}</text>`;
+            svgContent += `<text x="${xUp + mhWidth/2 + 10}" y="${yIUp+5}" text-anchor="start" class="svg-text" font-weight="bold">INV:${iUp.toFixed(2)}</text>`;
+
+            const slopeText = S !== null ? `S = ${S.toFixed(2)}%` : '';
+            const lenText = L !== null ? `L = ${L.toFixed(2)}m` : '';
+            
+            svgContent += `<rect x="${mx-60}" y="${my+15}" width="120" height="35" rx="4" fill="white" stroke="#cbd5e1" stroke-width="1" opacity="0.9"/>`;
+            svgContent += `<text x="${mx}" y="${my+30}" text-anchor="middle" class="svg-text" font-size="14" font-weight="bold" fill="#334155">${lenText}</text>`;
+            svgContent += `<text x="${mx}" y="${my+45}" text-anchor="middle" class="svg-text" font-size="14" fill="#f97316">${slopeText}</text>`;
+
+            els.svg.innerHTML = svgContent;
+        }
+    </script>
+</body>
+</html>
