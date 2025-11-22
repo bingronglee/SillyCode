@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>曼谷 4 天 3 夜：涼季精選版 (Siam 住宿)</title>
+    <style>
+        :root {
+            --primary: #8E44AD; /* Siam Purple */
+            --secondary: #F39C12; /* Gold */
+            --accent: #ff6f61; /* From your list */
+            --bg-color: #f8f9fa;
+            --card-bg: #ffffff;
+            --text-main: #2c3e50;
+            --text-light: #6c757d;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            background: linear-gradient(135deg, var(--primary), #ff6f61);
+            color: white;
+            padding: 40px 20px;
+            border-radius: 16px;
+            box-shadow: 0 8px 20px rgba(142, 68, 173, 0.2);
+        }
+
+        header h1 { margin: 0; font-size: 1.8rem; }
+        header p { margin-top: 10px; opacity: 0.95; }
+
+        .day-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            border-left: 6px solid var(--primary);
+        }
+
+        .day-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #f1f1f1;
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+
+        .day-title {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--primary);
+        }
+
+        .day-date {
+            background: #eee;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            color: var(--text-light);
+        }
+
+        .timeline-item {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 25px;
+            position: relative;
+        }
+
+        .time {
+            font-weight: 700;
+            min-width: 55px;
+            color: var(--primary);
+            font-size: 1.1rem;
+        }
+
+        .content {
+            flex: 1;
+        }
+
+        .activity-title {
+            font-weight: 700;
+            font-size: 1.1rem;
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .desc {
+            font-size: 0.95rem;
+            color: var(--text-light);
+        }
+
+        /* Badges */
+        .badge {
+            font-size: 0.75rem;
+            padding: 2px 8px;
+            border-radius: 4px;
+            color: white;
+            font-weight: normal;
+        }
+        .badge.must { background-color: var(--accent); } /* User's list items */
+        .badge.transport { background-color: #3498db; }
+        .badge.food { background-color: #27ae60; }
+
+        .highlight-box {
+            background: #fff3cd;
+            border: 1px solid #ffeeba;
+            color: #856404;
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            margin-top: 8px;
+        }
+
+        .alert-box {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            padding: 15px;
+            border-radius: 12px;
+            text-align: center;
+            font-weight: bold;
+            margin-top: 30px;
+        }
+
+        @media (max-width: 600px) {
+            .day-header { flex-direction: column; align-items: flex-start; }
+            .day-date { margin-top: 5px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>🇹🇭 曼谷 4 天 3 夜：涼季精選版</h1>
+        <p>住宿：Siam 區 | 結合您挑選的必去清單</p>
+    </header>
+
+    <!-- Day 1 -->
+    <div class="day-card">
+        <div class="day-header">
+            <div class="day-title">Day 1：宵夜場首選</div>
+            <div class="day-date">12/18 (週四)</div>
+        </div>
+
+        <div class="timeline-item">
+            <div class="time">20:00</div>
+            <div class="content">
+                <div class="activity-title">抵達廊曼機場 (DMK) <span class="badge transport">入境</span></div>
+                <div class="desc">辦理入境手續，叫 Grab/Bolt 前往 Siam 區飯店。</div>
+            </div>
+        </div>
+
+        <div class="timeline-item">
+            <div class="time">22:00</div>
+            <div class="content">
+                <div class="activity-title">
+                    Jeh O Chula (媽媽麵) 或 Banthat Thong 路
+                    <span class="badge must">你的清單</span>
+                    <span class="badge food">宵夜</span>
+                </div>
+                <div class="desc">
+                    <p>既然住在 Siam，離朱拉隆功大學美食街 (Banthat Thong) 很近。</p>
+                    <div class="highlight-box">
+                        🔥 <strong>攻略：</strong>Jeh O Chula 現場排隊可能要 2 小時。若太餓，建議直接在該條路上吃其他美食（如甜點、粥），或者去附近的 <strong>7-11</strong> 買熱壓吐司與優格回飯店休息。
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Day 2 -->
+    <div class="day-card">
+        <div class="day-header">
+            <div class="day-title">Day 2：經典老城與河岸</div>
+            <div class="day-date">12/19 (週五)</div>
+        </div>
+
+        <div class="timeline-item">
+            <div class="time">10:30</div>
+            <div class="content">
+                <div class="activity-title">
+                    Prachak Roasted Duck (百年燒鴨)
+                    <span class="badge must">你的清單</span>
+                    <span class="badge food">早午餐</span>
+                </div>
+                <div class="desc">搭 BTS 到 Saphan Taksin 站，先吃這家米其林推薦燒鴨，填飽肚子準備搭船。</div>
+            </div>
+        </div>
+
+        <div class="timeline-item">
+            <div class="time">12:00</div>
+            <div class="content">
+                <div class="activity-title">
+                    ICONSIAM 暹羅天地
+                    <span class="badge must">你的清單</span>
+                </div>
+                <div class="desc">從 Saphan Taksin 碼頭搭接駁船。在最熱的中午時段逛商場、看室內水上市場。</div>
+            </div>
+        </div>
+
+        <div class="timeline-item">
+            <div class="time">15:30</div>
+            <div class="content">
+                <div class="activity-title">
+                    臥佛寺 (Wat Pho) 泰式按摩
+                    <span class="badge must">你的清單</span>
+                    <span class="badge transport">搭船對岸</span>
+                </div>
+                <div class="desc">從 ICONSIAM 搭船到對岸。參觀巨大臥佛，並直接在寺內的按摩學校體驗最正宗的古法按摩 (建議先去排隊抽號碼)。</div>
+            </div>
+        </div>
+
+        <div class="timeline-item">
+            <div class="time">17:30</div>
+            <div class="content">
+                <div class="activity-title">
+                    鄭王廟 (Wat Arun) 或 觀景餐廳
+                    <span class="badge must">你的清單</span>
+                </div>
+                <div class="desc">搭接駁船到對岸看鄭王廟夕陽。或者在對岸的 <strong>Supanniga Eating Room</strong> 吃晚餐配河景 (需預約)。</div>
+            </div>
+        </div>
+
+        <div class="timeline-item">
+            <div class="time">19:30</div>
+            <div class="content">
+                <div class="activity-title">
+                    唐人街 (Yaowarat)
+                    <span class="badge must">你的清單</span>
+                    <span class="badge food">晚餐/宵夜</span>
+                </div>
+                <div class="desc">如果沒吃大餐，就來這裡掃街。涼季逛夜市非常舒服，必吃 T&K 海鮮或碳烤麵包。</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Day 3 -->
+    <div class="day-card">
+        <div class="day-header">
+            <div class="day-title">Day 3：購物與網美夜生活</div>
+            <div class="day-date">12/20 (週六)</div>
+        </div>
+
+        <div class="timeline-item">
+            <div class="time">10:00</div>
+            <div class="content">
+                <div class="activity-title">
+                    恰圖恰週末市集 (Chatuchak)
+                    <span class="badge must">你的清單</span>
+                </div>
+                <div class="desc">BTS 直達 Mo Chit。記得穿輕便，主攻椰子冰淇淋、香氛、設計T恤。</div>
+            </div>
+        </div>
+
+        <div class="timeline-item">
+            <div class="time">14:30</div>
+            <div class="content">
+                <div class="activity-title">
+                    Baan Ice 或 Nara Thai Cuisine
+                    <span class="badge must">你的清單</span>
+                    <span class="badge food">午餐</span>
+                </div>
+                <div class="desc">回到 Siam 區吹冷氣。推薦去 Siam Paragon 的 <strong>Baan Ice</strong> 吃泰南菜（口味較重、辣得過癮）。</div>
+            </div>
+        </div>
+
+        <div class="timeline-item">
+            <div class="time">16:30</div>
+            <div class="content">
+                <div class="activity-title">Siam 商圈自由逛</div>
+                <div class="desc">Big C 採買伴手禮，或回飯店放戰利品稍作休息。</div>
+            </div>
+        </div>
+
+        <div class="timeline-item">
+            <div class="time">19:00</div>
+            <div class="content">
+                <div class="activity-title">
+                    Jodd Fairs 夜市
+                    <span class="badge must">你的清單</span>
+                </div>
+                <div class="desc">搭 MRT 到 Rama 9。吃火山排骨、水果西施。</div>
+            </div>
+        </div>
+
+        <div class="timeline-item">
+            <div class="time">21:30</div>
+            <div class="content">
+                <div class="activity-title">
+                    Tichuca Rooftop Bar (阿凡達酒吧)
+                    <span class="badge must">你的清單</span>
+                    <span class="badge food">微醺</span>
+                </div>
+                <div class="desc">從 Jodd Fairs 搭車前往 Thong Lo (通羅區)。這家酒吧有巨型發光水母樹，氣氛極佳，記得帶護照檢查年齡。</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Day 4 -->
+    <div class="day-card">
+        <div class="day-header">
+            <div class="day-title">Day 4：高空美景與告別</div>
+            <div class="day-date">12/21 (週日)</div>
+        </div>
+
+        <div class="timeline-item">
+            <div class="time">11:00</div>
+            <div class="content">
+                <div class="activity-title">Check-out & 寄放行李</div>
+                <div class="desc">將行李寄放在 Siam 飯店，輕鬆出遊。</div>
+            </div>
+        </div>
+
+        <div class="timeline-item">
+            <div class="time">12:00</div>
+            <div class="content">
+                <div class="activity-title">
+                    金湯普森泰絲博物館
+                    <span class="badge must">你的清單</span>
+                </div>
+                <div class="desc">離 Siam 很近，參觀泰式傳統建築與花園，裡面也有很棒的餐廳可吃午餐。</div>
+            </div>
+        </div>
+
+        <div class="timeline-item">
+            <div class="time">15:00</div>
+            <div class="content">
+                <div class="activity-title">
+                    Mahanakhon SkyWalk (玻璃步道)
+                    <span class="badge must">你的清單</span>
+                </div>
+                <div class="desc">搭 BTS 到 Chong Nonsi。曼谷最高樓，下午去光線好拍照，也能待到日落。</div>
+            </div>
+        </div>
+
+        <div class="timeline-item">
+            <div class="time">18:00</div>
+            <div class="content">
+                <div class="activity-title">
+                    Siam 最後晚餐 & 按摩
+                    <span class="badge food">放鬆</span>
+                </div>
+                <div class="desc">回到 Siam 吃最後一頓（例如 Somboon 建興酒家），並找家按摩店按腳，消除這幾天的疲勞。</div>
+            </div>
+        </div>
+
+        <div class="timeline-item">
+            <div class="time">22:00</div>
+            <div class="content">
+                <div class="activity-title">出發前往機場 (DMK)</div>
+                <div class="desc">預留充裕時間叫車前往廊曼機場。</div>
+            </div>
+        </div>
+
+        <div class="alert-box">
+            ✈️ 班機提醒：12/22 (週日) 02:00 起飛<br>
+            請務必在 12/21 (週日) 23:55 前抵達櫃檯報到！
+        </div>
+    </div>
+
+</div>
+
+</body>
+</html>
