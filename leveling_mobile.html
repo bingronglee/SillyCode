@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=980">
-    <title>專業水準觀測計算表 - 修正版</title>
+    <title>水準觀測計算表</title>
     <style>
         :root {
             --border-color: #000000;
@@ -20,9 +20,9 @@
 
         .header-title {
             text-align: center;
-            font-size: 24px;
+            font-size: 22px;
             font-weight: bold;
-            margin: 10px 0;
+            margin: 5px 0;
             text-decoration: underline;
         }
 
@@ -30,53 +30,52 @@
             width: 100%;
             border-collapse: collapse;
             table-layout: fixed;
+            border: 2px solid #000;
         }
 
         th, td {
             border: 1px solid var(--border-color);
             padding: 0;
             text-align: center;
-            font-size: 14px;
-            height: 40px;
+            font-size: 13px; /* 稍微縮小字體以容納更多內容 */
+            height: 32px;   /* 固定高度確保 A4 格式整齊 */
         }
 
-        th { background-color: #f2f2f2; }
+        th { background-color: #f2f2f2; font-size: 12px; }
 
         /* 欄位寬度精確分配 */
-        .col-id { width: 70px; }
-        .col-val { width: 95px; }
+        .col-id { width: 60px; }
+        .col-val { width: 90px; }
         .col-dist { width: 85px; }
-        .col-corr { width: 85px; }
-        .col-elev { width: 105px; }
-        .col-note { width: 100px; }
+        .col-corr { width: 80px; }
+        .col-elev { width: 100px; }
+        .col-note { width: auto; }
 
         input {
             width: 100%;
             height: 100%;
             border: none;
             text-align: center;
-            font-size: 16px;
+            font-size: 15px;
             background: transparent;
             outline: none;
-            color: #000; /* 確保文字顏色為黑 */
+            color: #000;
         }
 
-        /* 顏色樣式修正 */
+        /* 顏色樣式 */
         .bg-yellow { background-color: var(--yellow-bg) !important; }
         .bg-blue { background-color: var(--blue-bg) !important; color: white; }
-        
-        /* 移除灰色網底，只保留唯讀功能 */
-        .readonly { background-color: transparent; cursor: default; }
+        .readonly { background-color: transparent; }
 
         .controls {
-            margin: 20px 0;
+            margin: 15px 0;
             display: flex;
             gap: 15px;
         }
 
         button {
-            padding: 12px 25px;
-            font-size: 18px;
+            padding: 10px 20px;
+            font-size: 16px;
             font-weight: bold;
             cursor: pointer;
             border: 2px solid #000;
@@ -84,8 +83,16 @@
             border-radius: 4px;
         }
 
-        .btn-add { background: #e8f4fd; }
-        .btn-save { background: #dff0d8; }
+        /* 列印專用樣式 */
+        @media print {
+            .controls { display: none; } /* 列印時隱藏按鈕 */
+            body { padding: 0; }
+            .header-title { margin-bottom: 10px; }
+            @page {
+                size: A4;
+                margin: 1cm;
+            }
+        }
     </style>
 </head>
 <body>
@@ -126,11 +133,19 @@
     </table>
 
     <div class="controls">
-        <button class="btn-add" onclick="addRow()">➕ 新增觀測點</button>
-        <button class="btn-save" onclick="exportCSV()">📥 匯出 CSV</button>
+        <button onclick="window.print()">🖨️ 直接列印 (A4)</button>
+        <button style="background: #dff0d8;" onclick="exportCSV()">📥 匯出 CSV 檔</button>
+        <button style="background: #f2f2f2;" onclick="addRow()">➕ 手動加列</button>
     </div>
 
     <script>
+        // 頁面載入時，自動新增到 60 列
+        window.onload = function() {
+            for (let i = 0; i < 59; i++) {
+                addRow();
+            }
+        };
+
         function addRow() {
             const table = document.querySelector("#surveyTable tbody");
             const row = document.createElement("tr");
@@ -177,13 +192,16 @@
         function exportCSV() {
             let csv = "\uFEFF點號,後視,前視,初測高程,後距,前距,改正數,最終高程,備註\n";
             document.querySelectorAll("#surveyTable tbody tr").forEach(row => {
-                const data = Array.from(row.querySelectorAll("input")).map(i => i.value);
-                csv += data.join(",") + "\n";
+                const inputs = Array.from(row.querySelectorAll("input")).map(i => i.value);
+                // 只匯出有填寫點號的列，避免匯出 60 列空白
+                if(inputs[0] !== "") {
+                    csv += inputs.join(",") + "\n";
+                }
             });
             const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement("a");
             link.href = URL.createObjectURL(blob);
-            link.download = `水準觀測_${new Date().getTime()}.csv`;
+            link.download = `水準紀錄_${new Date().toLocaleDateString()}.csv`;
             link.click();
         }
     </script>
