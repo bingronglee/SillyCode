@@ -2,210 +2,190 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>專業水準觀測記錄表</title>
+    <meta name="viewport" content="width=980">
+    <title>專業水準觀測計算表 - 修正版</title>
     <style>
         :root {
-            --primary-bg: #ffffff;
-            --header-bg: #f8f9fa;
             --border-color: #000000;
-            --input-focus: #e3f2fd;
+            --yellow-bg: #fff200;
+            --blue-bg: #00a2e8;
         }
 
         body {
             font-family: "Microsoft JhengHei", Arial, sans-serif;
             margin: 0;
-            padding: 10px;
-            background-color: #f0f0f0;
+            padding: 5px;
+            background-color: #ffffff;
         }
 
-        .container {
-            background: white;
-            padding: 10px;
-            border-radius: 4px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-
-        h2 { text-align: center; font-size: 1.2rem; margin-top: 0; }
-
-        .table-wrapper {
-            overflow-x: auto;
-            border: 1px solid var(--border-color);
+        .header-title {
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+            margin: 10px 0;
+            text-decoration: underline;
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
-            min-width: 900px; /* 確保欄位不擠壓 */
-            background: white;
             table-layout: fixed;
         }
 
         th, td {
             border: 1px solid var(--border-color);
-            padding: 4px;
+            padding: 0;
             text-align: center;
             font-size: 14px;
+            height: 40px;
         }
 
-        th { background-color: var(--header-bg); }
+        th { background-color: #f2f2f2; }
 
-        /* 標題列寬度調整 */
-        .col-id { width: 60px; }
-        .col-val { width: 80px; }
-        .col-dist { width: 80px; }
-        .col-elev { width: 90px; }
+        /* 欄位寬度精確分配 */
+        .col-id { width: 70px; }
+        .col-val { width: 95px; }
+        .col-dist { width: 85px; }
+        .col-corr { width: 85px; }
+        .col-elev { width: 105px; }
         .col-note { width: 100px; }
 
         input {
-            width: 95%;
+            width: 100%;
+            height: 100%;
             border: none;
             text-align: center;
-            font-size: 16px; /* 防止 iOS 縮放 */
-            padding: 8px 0;
+            font-size: 16px;
             background: transparent;
+            outline: none;
+            color: #000; /* 確保文字顏色為黑 */
         }
 
-        input:focus { background-color: var(--input-focus); outline: none; }
-
-        /* 唯讀欄位顏色 */
-        .readonly { background-color: #f9f9f9; color: #d32f2f; font-weight: bold; }
-        .initial-bg { background-color: #00a2e8; color: white; } /* 圖片中的藍色高程 */
-        .first-row-bg { background-color: #fff200; } /* 圖片中的黃色 */
+        /* 顏色樣式修正 */
+        .bg-yellow { background-color: var(--yellow-bg) !important; }
+        .bg-blue { background-color: var(--blue-bg) !important; color: white; }
+        
+        /* 移除灰色網底，只保留唯讀功能 */
+        .readonly { background-color: transparent; cursor: default; }
 
         .controls {
-            margin-top: 15px;
+            margin: 20px 0;
             display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
+            gap: 15px;
         }
 
         button {
-            flex: 1;
-            padding: 12px;
-            border: 1px solid #333;
-            background: #fff;
+            padding: 12px 25px;
+            font-size: 18px;
             font-weight: bold;
             cursor: pointer;
-            min-width: 120px;
+            border: 2px solid #000;
+            background: #fff;
+            border-radius: 4px;
         }
 
-        button:active { background: #eee; }
-        .btn-save { background: #27ae60; color: white; border: none; }
+        .btn-add { background: #e8f4fd; }
+        .btn-save { background: #dff0d8; }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h2>水準觀測計算表</h2>
+    <div class="header-title">水準觀測計算表</div>
 
-    <div class="table-wrapper">
-        <table id="surveyTable">
-            <thead>
-                <tr>
-                    <th rowspan="2" class="col-id">點號</th>
-                    <th colspan="2">標尺讀數</th>
-                    <th rowspan="2" class="col-elev">高程</th>
-                    <th colspan="2">距離</th>
-                    <th rowspan="2" class="col-val">改正數</th>
-                    <th rowspan="2" class="col-elev">高程 (改正後)</th>
-                    <th rowspan="2" class="col-note">備註</th>
-                </tr>
-                <tr>
-                    <th>後視(BS)</th>
-                    <th>前視(FS)</th>
-                    <th>後視</th>
-                    <th>前視</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td class="first-row-bg"><input type="text" value="B20"></td>
-                    <td><input type="number" step="0.001" class="bs-val" oninput="calculate()"></td>
-                    <td><input type="number" step="0.001" class="fs-val" oninput="calculate()"></td>
-                    <td class="initial-bg"><input type="number" step="0.001" class="elev-pre" value="31.961" oninput="calculate()"></td>
-                    <td><input type="number" step="0.01" class="bs-dist"></td>
-                    <td><input type="number" step="0.01" class="fs-dist"></td>
-                    <td><input type="number" step="0.0001" class="correction" oninput="calculate()"></td>
-                    <td class="first-row-bg"><input type="number" step="0.001" class="elev-final readonly" readonly></td>
-                    <td><input type="text"></td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
+    <table id="surveyTable">
+        <thead>
+            <tr>
+                <th rowspan="2" class="col-id">點號</th>
+                <th colspan="2">標尺讀數</th>
+                <th rowspan="2" class="col-elev">高程</th>
+                <th colspan="2">距離</th>
+                <th rowspan="2" class="col-corr">改正數</th>
+                <th rowspan="2" class="col-elev">高程</th>
+                <th rowspan="2" class="col-note">備註</th>
+            </tr>
+            <tr>
+                <th class="col-val">後視觀測值</th>
+                <th class="col-val">前視觀測值</th>
+                <th class="col-dist">後視觀測值</th>
+                <th class="col-dist">前視觀測值</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td class="bg-yellow"><input type="text" value="B20"></td>
+                <td><input type="number" step="0.001" class="bs-val" oninput="calculate()"></td>
+                <td><input type="number" step="0.001" class="fs-val" oninput="calculate()"></td>
+                <td class="bg-blue"><input type="number" step="0.001" class="elev-pre" value="31.961" oninput="calculate()"></td>
+                <td><input type="number" step="0.01"></td>
+                <td><input type="number" step="0.01"></td>
+                <td><input type="number" step="0.0001" class="correction" oninput="calculate()"></td>
+                <td class="bg-yellow"><input type="number" step="0.001" class="elev-final readonly" readonly></td>
+                <td><input type="text"></td>
+            </tr>
+        </tbody>
+    </table>
 
     <div class="controls">
-        <button onclick="addRow()">➕ 新增觀測點</button>
-        <button class="btn-save" onclick="exportCSV()">📥 匯出 CSV 檔</button>
-        <button onclick="if(confirm('確定清空？')) location.reload()">🗑️ 重置表單</button>
+        <button class="btn-add" onclick="addRow()">➕ 新增觀測點</button>
+        <button class="btn-save" onclick="exportCSV()">📥 匯出 CSV</button>
     </div>
-    
-    <p style="font-size: 12px; color: #666;">* 提示：手機橫屏看更清晰。高程(改正後) = 高程 + 改正數。</p>
-</div>
 
-<script>
-    function addRow() {
-        const table = document.querySelector("#surveyTable tbody");
-        const row = document.createElement("tr");
-        row.innerHTML = `
-            <td><input type="text"></td>
-            <td><input type="number" step="0.001" class="bs-val" oninput="calculate()"></td>
-            <td><input type="number" step="0.001" class="fs-val" oninput="calculate()"></td>
-            <td><input type="number" step="0.001" class="elev-pre readonly" readonly></td>
-            <td><input type="number" step="0.01" class="bs-dist"></td>
-            <td><input type="number" step="0.01" class="fs-dist"></td>
-            <td><input type="number" step="0.0001" class="correction" oninput="calculate()"></td>
-            <td><input type="number" step="0.001" class="elev-final readonly" readonly></td>
-            <td><input type="text"></td>
-        `;
-        table.appendChild(row);
-    }
+    <script>
+        function addRow() {
+            const table = document.querySelector("#surveyTable tbody");
+            const row = document.createElement("tr");
+            row.innerHTML = `
+                <td><input type="text"></td>
+                <td><input type="number" step="0.001" class="bs-val" oninput="calculate()"></td>
+                <td><input type="number" step="0.001" class="fs-val" oninput="calculate()"></td>
+                <td><input type="number" step="0.001" class="elev-pre readonly" readonly></td>
+                <td><input type="number" step="0.01"></td>
+                <td><input type="number" step="0.01"></td>
+                <td><input type="number" step="0.0001" class="correction" oninput="calculate()"></td>
+                <td class="bg-yellow"><input type="number" step="0.001" class="elev-final readonly" readonly></td>
+                <td><input type="text"></td>
+            `;
+            table.appendChild(row);
+        }
 
-    function calculate() {
-        const rows = document.querySelectorAll("#surveyTable tbody tr");
-        let currentHI = 0;
+        function calculate() {
+            const rows = document.querySelectorAll("#surveyTable tbody tr");
+            let currentHI = 0;
 
-        rows.forEach((row, index) => {
-            const bs = parseFloat(row.querySelector(".bs-val").value) || 0;
-            const fs = parseFloat(row.querySelector(".fs-val").value) || 0;
-            const corr = parseFloat(row.querySelector(".correction").value) || 0;
-            const elevPreInput = row.querySelector(".elev-pre");
-            const elevFinalInput = row.querySelector(".elev-final");
+            rows.forEach((row, index) => {
+                const bs = parseFloat(row.querySelector(".bs-val").value) || 0;
+                const fs = parseFloat(row.querySelector(".fs-val").value) || 0;
+                const corr = parseFloat(row.querySelector(".correction").value) || 0;
+                const elevPreInput = row.querySelector(".elev-pre");
+                const elevFinalInput = row.querySelector(".elev-final");
 
-            if (index === 0) {
-                // 基準點
-                let baseElev = parseFloat(elevPreInput.value) || 0;
-                elevFinalInput.value = (baseElev + corr).toFixed(3);
-                if (bs !== 0) currentHI = baseElev + bs;
-            } else {
-                // 觀測點
-                if (currentHI !== 0) {
-                    let preElev = currentHI - fs;
-                    elevPreInput.value = preElev.toFixed(3);
-                    elevFinalInput.value = (preElev + corr).toFixed(3);
-                    
-                    // 如果這點有後視，更新器高給下一點用
-                    if (bs !== 0) {
-                        currentHI = preElev + bs;
+                if (index === 0) {
+                    let baseElev = parseFloat(elevPreInput.value) || 0;
+                    elevFinalInput.value = (baseElev + corr).toFixed(3);
+                    if (bs !== 0) currentHI = baseElev + bs;
+                } else {
+                    if (currentHI !== 0) {
+                        let preElev = currentHI - fs;
+                        elevPreInput.value = preElev.toFixed(3);
+                        elevFinalInput.value = (preElev + corr).toFixed(3);
+                        if (bs !== 0) currentHI = preElev + bs;
                     }
                 }
-            }
-        });
-    }
+            });
+        }
 
-    function exportCSV() {
-        let csv = "\uFEFF點號,後視(BS),前視(FS),高程,後視距離,前視距離,改正數,高程(改正後),備註\n";
-        document.querySelectorAll("#surveyTable tbody tr").forEach(row => {
-            const data = Array.from(row.querySelectorAll("input")).map(i => i.value);
-            csv += data.join(",") + "\n";
-        });
-        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-        const link = document.createElement("a");
-        link.href = URL.createObjectURL(blob);
-        link.download = `水準觀測紀錄_${new Date().getTime()}.csv`;
-        link.click();
-    }
-</script>
-
+        function exportCSV() {
+            let csv = "\uFEFF點號,後視,前視,初測高程,後距,前距,改正數,最終高程,備註\n";
+            document.querySelectorAll("#surveyTable tbody tr").forEach(row => {
+                const data = Array.from(row.querySelectorAll("input")).map(i => i.value);
+                csv += data.join(",") + "\n";
+            });
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = `水準觀測_${new Date().getTime()}.csv`;
+            link.click();
+        }
+    </script>
 </body>
 </html>
