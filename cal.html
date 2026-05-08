@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>污水管線縱斷面計算機 (重力流)</title>
+    <title>污水管線縱斷面計算機 (重力流) - 支援深度反推</title>
     <style>
         :root {
             --bg-color: #1e293b;
@@ -315,18 +315,82 @@
                 msg: document.getElementById('statusMsg')
             };
 
-            // 2. 綁定 Input 清除樣式事件
+            // 2. 新增：深度反推功能 - 讓 depth_up 和 depth_down 變成可輸入
+            //   將原本 readonly 移除，變成可手動輸入數值來反推 INV
+            els.depth_up.removeAttribute('readonly');
+            els.depth_down.removeAttribute('readonly');
+            // 調整樣式讓可輸入的深度欄位外觀不那麼像唯讀
+            els.depth_up.style.background = "var(--input-bg)";
+            els.depth_down.style.background = "var(--input-bg)";
+            els.depth_up.style.cursor = "text";
+            els.depth_down.style.cursor = "text";
+            
+            // 3. 綁定深度欄位變動事件 - 當輸入深度時自動反推管底高程
+            els.depth_up.addEventListener('input', function() {
+                const gl = parseFloat(els.gl_up.value);
+                const depth = parseFloat(els.depth_up.value);
+                if (!isNaN(gl) && !isNaN(depth)) {
+                    const newInv = gl - depth;
+                    if (!isNaN(newInv)) {
+                        els.inv_up.value = newInv.toFixed(3);
+                        els.inv_up.classList.add('auto-filled');
+                        setTimeout(() => els.inv_up.classList.remove('auto-filled'), 2000);
+                    }
+                }
+            });
+            
+            els.depth_down.addEventListener('input', function() {
+                const gl = parseFloat(els.gl_down.value);
+                const depth = parseFloat(els.depth_down.value);
+                if (!isNaN(gl) && !isNaN(depth)) {
+                    const newInv = gl - depth;
+                    if (!isNaN(newInv)) {
+                        els.inv_down.value = newInv.toFixed(3);
+                        els.inv_down.classList.add('auto-filled');
+                        setTimeout(() => els.inv_down.classList.remove('auto-filled'), 2000);
+                    }
+                }
+            });
+            
+            // 當地面高程變動時，如果有深度值，也自動重新計算管底
+            els.gl_up.addEventListener('input', function() {
+                const depth = parseFloat(els.depth_up.value);
+                const gl = parseFloat(els.gl_up.value);
+                if (!isNaN(gl) && !isNaN(depth)) {
+                    const newInv = gl - depth;
+                    if (!isNaN(newInv)) {
+                        els.inv_up.value = newInv.toFixed(3);
+                        els.inv_up.classList.add('auto-filled');
+                        setTimeout(() => els.inv_up.classList.remove('auto-filled'), 2000);
+                    }
+                }
+            });
+            
+            els.gl_down.addEventListener('input', function() {
+                const depth = parseFloat(els.depth_down.value);
+                const gl = parseFloat(els.gl_down.value);
+                if (!isNaN(gl) && !isNaN(depth)) {
+                    const newInv = gl - depth;
+                    if (!isNaN(newInv)) {
+                        els.inv_down.value = newInv.toFixed(3);
+                        els.inv_down.classList.add('auto-filled');
+                        setTimeout(() => els.inv_down.classList.remove('auto-filled'), 2000);
+                    }
+                }
+            });
+
+            // 4. 綁定 Input 清除樣式事件
             document.querySelectorAll('input').forEach(input => {
                 input.addEventListener('input', () => input.classList.remove('auto-filled'));
             });
 
-            // 3. 載入範例數據 (這就是您要的功能)
+            // 5. 載入範例數據 (原本就有的功能)
             loadExampleData();
         }
 
         // 載入範例數據
         function loadExampleData() {
-            if(!els.inv_up) return; // 雙重確認
+            if(!els.inv_up) return;
 
             // 設定一組合理的範例數據
             els.gl_up.value = "10.50";
@@ -349,7 +413,7 @@
         // 等待網頁完全載入後才執行初始化
         window.addEventListener('DOMContentLoaded', init);
 
-        // --- 以下為計算邏輯 (與之前相同) ---
+        // --- 以下為計算邏輯 (與之前相同，只新增深度同步更新) ---
 
         const val = (id) => {
             const v = parseFloat(els[id].value);
@@ -358,6 +422,7 @@
 
         const setVal = (id, v, isAuto = true) => {
             const el = els[id];
+            if (!el) return;
             el.value = v.toFixed(3); 
             if (isAuto) {
                 el.classList.add('auto-filled');
@@ -375,25 +440,57 @@
             els.msg.textContent = '';
             els.msg.className = 'status-msg';
 
-            let gUp = val('gl_up');
-            let gDown = val('gl_down');
+            // 先同步深度：如果有深度值且沒有管底值，用深度反推管底
+            let depthUp = val('depth_up');
+            let depthDown = val('depth_down');
+            let glUp = val('gl_up');
+            let glDown = val('gl_down');
+            let invUp = val('inv_up');
+            let invDown = val('inv_down');
             
-            if (gUp !== null && gDown === null) {
-                gDown = gUp;
-                setVal('gl_down', gDown);
-            } else if (gDown !== null && gUp === null) {
-                gUp = gDown;
-                setVal('gl_up', gUp);
+            // 深度反推邏輯 (上游)
+            if (depthUp !== null && glUp !== null && invUp === null) {
+                let newInvUp = glUp - depthUp;
+                if (!isNaN(newInvUp)) {
+                    setVal('inv_up', newInvUp);
+                    invUp = newInvUp;
+                }
+            }
+            // 深度反推邏輯 (下游)
+            if (depthDown !== null && glDown !== null && invDown === null) {
+                let newInvDown = glDown - depthDown;
+                if (!isNaN(newInvDown)) {
+                    setVal('inv_down', newInvDown);
+                    invDown = newInvDown;
+                }
+            }
+            
+            // 重新獲取更新後的值
+            glUp = val('gl_up');
+            glDown = val('gl_down');
+            invUp = val('inv_up');
+            invDown = val('inv_down');
+            
+            // 地面高程互相補齊
+            if (glUp !== null && glDown === null) {
+                glDown = glUp;
+                setVal('gl_down', glDown);
+            } else if (glDown !== null && glUp === null) {
+                glUp = glDown;
+                setVal('gl_up', glUp);
             }
 
-            let iUp = val('inv_up');
-            let iDown = val('inv_down');
+            // 重新獲取更新後的值
+            glUp = val('gl_up');
+            glDown = val('gl_down');
+            invUp = val('inv_up');
+            invDown = val('inv_down');
             let L = val('length');
             let S = val('slope');
 
             try {
-                if (iUp !== null && iDown !== null) {
-                    const fall = iUp - iDown;
+                if (invUp !== null && invDown !== null) {
+                    const fall = invUp - invDown;
                     setVal('fall', fall);
                     
                     if (L !== null && S === null) {
@@ -407,45 +504,68 @@
                         setVal('length', L);
                     }
                 }
-                else if (iUp !== null && L !== null && S !== null && iDown === null) {
+                else if (invUp !== null && L !== null && S !== null && invDown === null) {
                     const fall = L * (S / 100);
-                    iDown = iUp - fall;
-                    setVal('inv_down', iDown);
+                    invDown = invUp - fall;
+                    setVal('inv_down', invDown);
                     setVal('fall', fall);
                 }
-                else if (iDown !== null && L !== null && S !== null && iUp === null) {
+                else if (invDown !== null && L !== null && S !== null && invUp === null) {
                     const fall = L * (S / 100);
-                    iUp = iDown + fall;
-                    setVal('inv_up', iUp);
+                    invUp = invDown + fall;
+                    setVal('inv_up', invUp);
                     setVal('fall', fall);
                 }
             } catch (e) {
                 els.msg.textContent = "錯誤: " + e;
                 els.msg.classList.add('error');
+                drawSVG(glUp, glDown, invUp, invDown, L, S);
                 return;
             }
 
-            iUp = val('inv_up');
-            iDown = val('inv_down');
-            gUp = val('gl_up');
-            gDown = val('gl_down');
+            // 重新獲取最終值
+            invUp = val('inv_up');
+            invDown = val('inv_down');
+            glUp = val('gl_up');
+            glDown = val('gl_down');
+            L = val('length');
+            S = val('slope');
 
-            if (iUp !== null && gUp !== null) setVal('depth_up', gUp - iUp, false);
-            if (iDown !== null && gDown !== null) setVal('depth_down', gDown - iDown, false);
-
-            if (iUp !== null && iDown !== null && iUp < iDown) {
-                els.msg.innerHTML = "⚠️ 警告：發生逆坡 (上游高程低於下游)，請檢查數據！";
-                els.msg.classList.add('error');
-            } else if (S !== null && S < 0.3) {
-                els.msg.innerHTML = "ℹ️ 提示：坡度小於 0.3%，流速可能不足。";
-                els.msg.classList.add('info');
+            // 更新深度顯示
+            if (invUp !== null && glUp !== null) {
+                let depthCalc = glUp - invUp;
+                setVal('depth_up', depthCalc, false);
+            }
+            if (invDown !== null && glDown !== null) {
+                let depthCalc = glDown - invDown;
+                setVal('depth_down', depthCalc, false);
             }
 
-            drawSVG(gUp, gDown, iUp, iDown, L, S);
+            if (invUp !== null && invDown !== null && invUp < invDown) {
+                els.msg.innerHTML = "⚠️ 警告：發生逆坡 (上游高程低於下游)，請檢查數據！";
+                els.msg.classList.add('error');
+            } else if (S !== null && S < 0.3 && S >= 0) {
+                els.msg.innerHTML = "ℹ️ 提示：坡度小於 0.3%，流速可能不足。";
+                els.msg.classList.add('info');
+            } else if (S !== null && S < 0) {
+                els.msg.innerHTML = "⚠️ 警告：坡度為負值，請檢查流向定義！";
+                els.msg.classList.add('error');
+            }
+
+            drawSVG(glUp, glDown, invUp, invDown, L, S);
         }
 
         function drawSVG(gUp, gDown, iUp, iDown, L, S) {
-            if (iUp === null || iDown === null) return;
+            if (iUp === null || iDown === null) {
+                // 如果缺少管底資料，但至少要有基本的繪圖資訊
+                if (iUp === null && iDown === null) {
+                    els.svg.innerHTML = '<text x="400" y="200" text-anchor="middle" fill="#94a3b8">請輸入管底高程(INV)或輸入深度(D)自動反推</text>';
+                    return;
+                }
+                // 單邊有值時，勉強繪製示意
+                if (iUp === null) iUp = iDown + 0.5;
+                if (iDown === null) iDown = iUp - 0.5;
+            }
 
             const maxInv = Math.max(iUp, iDown);
             let drawGUp = gUp !== null ? gUp : maxInv + 2.5;
