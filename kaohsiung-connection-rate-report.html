@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>高雄市接管率報告生成器</title>
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #1a73e8 0%, #1557b0 100%);
+            --success-color: #34a853;
+        }
+        body { font-family: 'Segoe UI', "Microsoft JhengHei", sans-serif; background: #f0f2f5; padding: 20px; }
+        .container { max-width: 600px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px; }
+        .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        h2 { margin-top: 0; color: #1a73e8; border-bottom: 2px solid #e8f0fe; padding-bottom: 10px; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: 600; font-size: 0.9rem; }
+        input { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
+        textarea {
+            width: 100%; height: 180px; padding: 12px; border: 1px solid #ddd;
+            border-radius: 8px; font-size: 1rem; line-height: 1.6; resize: none; background: #fdfdfd;
+        }
+        .btn-submit {
+            width: 100%; padding: 15px; background: var(--primary-gradient);
+            color: white; border: none; border-radius: 6px; font-size: 1rem;
+            font-weight: 600; cursor: pointer; transition: all 0.3s; margin-top: 10px;
+        }
+        .btn-submit:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(26, 115, 232, 0.3); }
+        .btn-submit:disabled { background: #ccc; cursor: not-allowed; }
+        #status-msg {
+            display: none; text-align: center; margin: 15px 0; color: #666; font-size: 0.9rem;
+            font-style: italic; animation: pulse 1.5s infinite;
+        }
+        @keyframes pulse { 0% { opacity: 0.6; } 50% { opacity: 1; } 100% { opacity: 0.6; } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <h2>📝 報告文字生成（純 HTML/JS 版）</h2>
+            <form id="report-form">
+                <div class="form-group">
+                    <label>1. 行政區名稱</label>
+                    <input type="text" id="district" value="鳳山區" required>
+                </div>
+                <div class="form-group">
+                    <label>2. 本工程預計接管戶數</label>
+                    <input type="number" id="user-conn" placeholder="請輸入純數字，例如：1200" required min="1">
+                </div>
+                <button type="submit" class="btn-submit" id="submit-btn">🚀 抓取數據並生成報告</button>
+                <div id="status-msg">正在取得高雄市最新戶數統計，請稍候...</div>
+            </form>
+            <div id="result-area" style="display:none; margin-top:25px;">
+                <label style="font-weight: bold; color: #1a73e8;">📋 生成的報告文字：</label>
+                <textarea id="result-text" readonly></textarea>
+                <button class="btn-submit" style="background: var(--success-color);" onclick="copyResult()">一鍵複製報告文字</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function copyResult() {
+            const text = document.getElementById('result-text');
+            text.select();
+            document.execCommand('copy');
+            alert('✅ 報告文字已複製到剪貼簿！');
+        }
+
+        async function fetchDemographicsData() {
+            const apiUrl = 'https://demographics.kcg.gov.tw/demographstats/detailed/population/districts';
+            
+            // 嘗試直接抓取 API
+            try {
+                const res = await fetch(apiUrl);
+                if (res.ok) return await res.json();
+            } catch (e) {
+                console.warn("直接存取 API 受 CORS 限制，嘗試經由代理轉接...");
+            }
+
+            // 若受 CORS 限制，切換備用 CORS 代理
+            const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(apiUrl)}`;
+            const resProxy = await fetch(proxyUrl);
+            if (!resProxy.ok) throw new Error("無法連接至高雄市民政局 API 伺服器");
+            return await resProxy.json();
+        }
+
+        document.getElementById('report-form').onsubmit = async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('submit-btn');
+            const statusMsg = document.getElementById('status-msg');
+            const resultArea = document.getElementById('result-area');
+            const resultText = document.getElementById('result-text');
+
+            const targetDistRaw = document.getElementById('district').value.trim();
+            const userConn = parseFloat(document.getElementById('user-conn').value);
+
+            if (!targetDistRaw) {
+                alert("請輸入行政區名稱");
+                return;
+            }
+            if (isNaN(userConn) || userConn <= 0) {
+                alert("預計接管戶數必須大於 0");
+                return;
+            }
+
+            // 行政區名稱容錯處理：補上「區」字
+            const targetDist = targetDistRaw.endsWith("區") ? targetDistRaw : `${targetDistRaw}區`;
+
+            btn.disabled = true;
+            statusMsg.style.display = 'block';
+            resultArea.style.display = 'none';
+
+            try {
+                // 1. 抓取 API
+                const records = await fetchDemographicsData();
+                if (!Array.isArray(records) || records.length === 0) {
+                    throw new Error("取得的統計資料格式不正確");
+                }
+
+                // 2. 尋找高雄市與指定行政區數據
+                const city = records.find(item => item.districtName === "高雄市");
+                const district = records.find(item => item.districtName === targetDistRaw || item.districtName === targetDist);
+
+                if (!city || !district) {
+                    throw new Error(`找不到「${targetDistRaw}」或高雄市的戶數資料`);
+                }
+
+                const kcgTotal = parseInt(city.houseCount, 10);
+                const distTotal = parseInt(district.houseCount, 10);
+                const year = city.yReport;
+                const month = city.mReport;
+                const distName = district.districtName;
+
+                if (kcgTotal <= 0 || distTotal <= 0) {
+                    throw new Error("取得的戶數不得為零");
+                }
+
+                // 3. 計算接管率提升幅度
+                const kcgRateInc = (userConn / kcgTotal * 100).toFixed(2);
+                const distRateInc = (userConn / distTotal * 100).toFixed(2);
+
+                // 4. 格式化輸出報告 (使用 toLocaleString 處理千分號)
+                const finalText = `本工程預計接管戶數為 ${Math.floor(userConn).toLocaleString('zh-TW')} 戶，` +
+                    `依據民國${year}年${month}月高雄市戶數統計，高雄市戶數為 ${kcgTotal.toLocaleString('zh-TW')} 戶，` +
+                    `本工程可提升全市用戶接管率 ${kcgRateInc} %，` +
+                    `而 ${distName} 戶數為 ${distTotal.toLocaleString('zh-TW')} 戶，` +
+                    `預計可提升本區用戶接管率 ${distRateInc} %。`;
+
+                resultText.value = finalText;
+                resultArea.style.display = 'block';
+            } catch (error) {
+                alert(`❌ 錯誤：${error.message}`);
+            } finally {
+                btn.disabled = false;
+                statusMsg.style.display = 'none';
+            }
+        };
+    </script>
+</body>
+</html>
